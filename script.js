@@ -3,16 +3,7 @@
 // ==========================================
 console.log("🔍 開始初始化 Firebase...");
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBBMfACHtbo33b1RzjNEfJAl2rTOdNAuzE",
-  authDomain: "knitting-counter-dabb7.firebaseapp.com",
-  projectId: "knitting-counter-dabb7",
-  storageBucket: "knitting-counter-dabb7.firebasestorage.app",
-  messagingSenderId: "914715073456",
-  appId: "1:914715073456:web:ecb537d693bb8cb5e8d475",
-  measurementId: "G-RQYZQNS07T"
-};
-
+// firebaseConfig 已經由外部的 config.js 提供
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
