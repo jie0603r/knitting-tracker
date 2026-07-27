@@ -1,87 +1,65 @@
-/* ==========================================
-   1. 全局變數與重置
-   ========================================== */
-:root {
-  --primary-color: #6c5ce7;
-  --primary-hover: #5a4bcf;
-  --bg-color: #f8f9fa;
-  --card-bg: #ffffff;
-  --text-main: #2d3436;
-  --text-muted: #636e72;
-  --accent-minus: #ffeaa7;
-  --text-minus: #d63031;
-  --border-radius: 16px;
-  --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
+/* 全域變數與基礎設定 */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  padding: 20px 16px;
+  background-color: #f8f9fa;
+  color: #2d3436;
   display: flex;
   justify-content: center;
+  padding: 20px;
 }
 
 .app-container {
   width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  max-width: 600px;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 header {
   text-align: center;
+  margin-bottom: 24px;
 }
 
 header h1 {
-  font-size: 1.5rem;
-  color: var(--primary-color);
+  font-size: 1.6rem;
+  color: #2d3436;
+  margin-bottom: 6px;
 }
 
 .subtitle {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.9rem;
+  color: #636e72;
 }
 
-/* ==========================================
-   2. 作品選擇區塊與輸入區塊
-   ========================================== */
-.project-section, .input-section {
-  background: var(--card-bg);
+/* 作品選擇區 */
+.project-section {
+  background: #f1f2f6;
   padding: 16px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+  border-radius: 12px;
+  margin-bottom: 20px;
 }
 
 .project-selector-group {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.project-selector-group label {
-  font-weight: bold;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-select {
+.project-selector-group select {
   flex: 1;
-  padding: 10px;
+  padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #dfe6e9;
-  font-size: 0.95rem;
-  outline: none;
-  background-color: #fff;
+  border: 1px solid #dfe4ea;
+  font-size: 1rem;
 }
 
 .project-create-group {
@@ -89,73 +67,109 @@ select {
   gap: 8px;
 }
 
-.project-create-group input, .form-group input {
+.project-create-group input {
   flex: 1;
-  padding: 10px;
-  border: 1px solid #dfe6e9;
+  padding: 8px 12px;
   border-radius: 8px;
-  font-size: 0.9rem;
+  border: 1px solid #dfe4ea;
 }
 
-.btn-secondary {
-  padding: 8px 12px;
-  background-color: #e0e0e0;
-  color: #2d3436;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  white-space: nowrap;
+/* 表單與輸入區 */
+.input-section {
+  background: #ffffff;
+  border: 1px solid #eccc68;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
 }
 
 .input-section h2 {
-  font-size: 1rem;
+  font-size: 1.1rem;
   margin-bottom: 12px;
+  color: #d35400;
 }
 
 .form-group {
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  margin-bottom: 12px;
 }
 
 .form-group label {
+  display: block;
   font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: #57606f;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #dfe4ea;
+}
+
+/* 按鈕通用樣式 */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
   font-weight: 600;
-  color: var(--text-muted);
+  transition: all 0.2s ease;
 }
 
 .btn-primary {
   width: 100%;
-  padding: 12px;
-  font-size: 0.95rem;
-  font-weight: bold;
+  padding: 10px;
+  background-color: #e67e22;
   color: white;
-  background-color: var(--primary-color);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  font-size: 1rem;
 }
 
-/* ==========================================
-   3. 卡片與小方格呈現
-   ========================================== */
-.counter-card {
-  background: var(--card-bg);
-  padding: 16px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+.btn-primary:hover {
+  background-color: #d35400;
+}
+
+.btn-secondary {
+  padding: 8px 12px;
+  background-color: #74b9ff;
+  color: white;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  background-color: #0984e3;
+}
+
+.btn-tool {
+  background: transparent;
+  padding: 6px 8px;
+  font-size: 1.1rem;
+  border-radius: 6px;
+}
+
+.btn-tool:hover {
+  background-color: #dfe4ea;
+}
+
+/* 卡片與列表區塊 */
+.counter-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+}
+
+.counter-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 12px;
 }
 
 .card-title-group {
@@ -165,106 +179,251 @@ select {
 }
 
 .status-badge {
-  background-color: #ffeaa7;
-  color: #d63031;
-  padding: 3px 8px;
-  border-radius: 12px;
   font-size: 0.75rem;
-  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #ffeaa7;
+  color: #d35400;
 }
 
 .status-badge.completed {
   background-color: #55efc4;
-  color: #002211;
+  color: #00b894;
 }
 
-.card-tools {
+/* 開啟/關閉提醒按鈕區 */
+.reminder-toggle-bar {
+  margin-bottom: 12px;
+}
+
+.btn-add-reminder {
+  background-color: #f1f2f6;
+  color: #57606f;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px dashed #b2bec3;
+}
+
+.btn-add-reminder:hover {
+  background-color: #dfe4ea;
+  color: #2d3436;
+}
+
+/* 加減針設定列 */
+.card-setting-bar {
   display: flex;
-  gap: 6px;
-}
-
-.btn-tool {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 0.9rem;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.btn-tool:hover {
-  background: #f1f2f6;
-}
-
-/* 小方格容器 (Grid Container) */
-.grid-container {
-  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 8px 0;
-  max-height: 180px;
-  overflow-y: auto;
+  background: #fff8ed;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #d35400;
+  margin-bottom: 8px;
+  border: 1px dashed #f39c12;
+}
+
+.card-setting-bar select, 
+.card-setting-bar input {
+  padding: 2px 6px;
+  border: 1px solid #f39c12;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  background: #ffffff;
+}
+
+.card-setting-bar input[type="number"] {
+  width: 44px;
+  text-align: center;
+}
+
+.btn-remove-reminder {
+  margin-left: auto;
+  background: transparent;
+  color: #e74c3c;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+}
+
+.btn-remove-reminder:hover {
+  background: #ff7675;
+  color: white;
+}
+
+/* 模式切換列 (記錄進度 vs 標記提醒) */
+.mode-switch-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  background-color: #f1f2f6;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.btn-mode {
+  flex: 1;
+  padding: 6px;
+  font-size: 0.8rem;
+  background: transparent;
+  color: #636e72;
+  border-radius: 6px;
+}
+
+.btn-mode.active {
+  background: #ffffff;
+  color: #2d3436;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.btn-mode.active.edit-mode {
+  background: #ffeaa7;
+  color: #d35400;
+}
+
+/* 格子區域 */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
 .grid-square {
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--primary-color);
-  border-radius: 4px;
-  background-color: transparent;
+  aspect-ratio: 1;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #f8fafc;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #94a3b8;
+  position: relative;
   transition: all 0.15s ease;
 }
 
-.grid-square.filled {
-  background-color: var(--primary-color);
-}
-
 .grid-square:hover {
-  transform: scale(1.15);
+  border-color: #94a3b8;
 }
 
-/* 數字進度資訊 */
+.edit-mode-active .grid-square:hover {
+  border-color: #e67e22 !important;
+  transform: scale(1.05);
+}
+
+/* 已完成的格子 */
+.grid-square.filled {
+  background-color: #74b9ff;
+  border-color: #0984e3;
+  color: #ffffff;
+}
+
+/* 加針格子的視覺樣式 */
+.grid-square.reminder-increase {
+  border: 2px solid #e67e22 !important;
+  box-shadow: 0 0 4px rgba(230, 126, 34, 0.4);
+}
+
+.grid-square.reminder-increase.filled {
+  background-color: #e67e22 !important;
+  border-color: #d35400 !important;
+  color: #ffffff;
+}
+
+/* 減針格子的視覺樣式 */
+.grid-square.reminder-decrease {
+  border: 2px solid #9b59b6 !important;
+  box-shadow: 0 0 4px rgba(155, 89, 182, 0.4);
+}
+
+.grid-square.reminder-decrease.filled {
+  background-color: #9b59b6 !important;
+  border-color: #8e44ad !important;
+  color: #ffffff;
+}
+
+/* 格子內小標籤 */
+.grid-tag {
+  font-size: 0.55rem;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+/* 備忘筆記區 */
+.card-notes-area {
+  margin-top: 12px;
+}
+
+.card-notes-area textarea {
+  width: 100%;
+  height: 52px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #dfe4ea;
+  font-size: 0.85rem;
+  resize: vertical;
+  background-color: #fafafa;
+}
+
+.card-notes-area textarea:focus {
+  outline: none;
+  border-color: #e67e22;
+  background-color: #ffffff;
+}
+
+/* 進度與大數字區域 */
 .progress-info {
   text-align: center;
+  margin-bottom: 12px;
   font-size: 1.1rem;
-  font-weight: bold;
-  color: var(--text-muted);
+  color: #636e72;
+  font-weight: 600;
 }
 
+/* 🌟 目前行數：預設橘色大字體 (加針/一般狀態) */
 .progress-info .current-row {
-  color: var(--primary-color);
-  font-size: 2.2rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #e67e22;
+  margin-right: 2px;
+  transition: color 0.2s ease;
 }
 
-/* 手機大按鈕 */
+/* 🌟【關鍵修復】：強化選擇器權重，強制轉為紫色 */
+.progress-info .current-row.is-decrease {
+  color: #9b59b6 !important;
+}
+
+/* 預定總行數 */
+.progress-info .total-row {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3436;
+  margin-left: 2px;
+}
+
 .button-group {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .btn-counter {
   flex: 1;
-  padding: 14px 0;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn-counter:active {
-  transform: scale(0.95);
+  padding: 8px;
+  font-size: 1rem;
 }
 
 .btn-minus {
-  background-color: var(--accent-minus);
-  color: var(--text-minus);
+  background-color: #dfe4ea;
+  color: #2d3436;
 }
 
 .btn-plus {
-  background-color: var(--primary-color);
+  background-color: #00b894;
   color: white;
 }

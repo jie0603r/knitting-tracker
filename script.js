@@ -3,7 +3,6 @@
 // ==========================================
 console.log("🔍 開始初始化 Firebase...");
 
-// ⚠️ 請將下方的內容替換為你在 Firebase Console 複製到的專屬金鑰
 const firebaseConfig = {
   apiKey: "AIzaSyBBMfACHtbo33b1RzjNEfJAl2rTOdNAuzE",
   authDomain: "knitting-counter-dabb7.firebaseapp.com",
@@ -14,11 +13,9 @@ const firebaseConfig = {
   measurementId: "G-RQYZQNS07T"
 };
 
-// 使用全域 firebase 物件初始化
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// 設定雲端儲存路徑
 const syncRoomId = "my-knitting-room";
 const dbRef = database.ref(`knitting_apps/${syncRoomId}`);
 
@@ -28,8 +25,8 @@ const dbRef = database.ref(`knitting_apps/${syncRoomId}`);
 const projectSelect = document.getElementById('project-select');
 const newProjectInput = document.getElementById('new-project-name');
 const addProjectBtn = document.getElementById('add-project-btn');
-const editProjectBtn = document.getElementById('edit-project-btn'); // 🌟 新增
-const deleteProjectBtn = document.getElementById('delete-project-btn'); // 🌟 新增
+const editProjectBtn = document.getElementById('edit-project-btn');
+const deleteProjectBtn = document.getElementById('delete-project-btn');
 const currentProjectTitle = document.getElementById('current-project-title');
 
 const sectionNameInput = document.getElementById('section-name');
@@ -56,11 +53,20 @@ function listenToCloudStorage() {
     if (data) {
       projects = data.projects || [];
       
-      // 防呆處理：確保每個作品都包含 sections 陣列
+      // 補全屬性預設值
       projects.forEach(p => {
-        if (!p.sections) {
-          p.sections = [];
-        }
+        if (!p.sections) p.sections = [];
+        p.sections.forEach(s => {
+          if (s.hasReminder === undefined) s.hasReminder = false;
+          if (s.actionType === undefined) s.actionType = 'increase';
+          if (s.interval === undefined) s.interval = 4;
+          if (s.startRow === undefined) s.startRow = 1;
+          if (s.notes === undefined) s.notes = "";
+          if (s.mode === undefined) s.mode = 'progress';
+          if (!Array.isArray(s.customReminders)) {
+            s.customReminders = calculateDefaultReminders(s.total, s.interval, s.startRow);
+          }
+        });
       });
 
       currentProjectId = data.currentProjectId || (projects[0] ? projects[0].id : null);
@@ -87,10 +93,21 @@ function saveToStorage() {
   });
 }
 
+// 計算預設提醒行數的輔助函式
+function calculateDefaultReminders(total, interval, startRow) {
+  const reminders = [];
+  if (interval <= 0) return reminders;
+  for (let i = 1; i <= total; i++) {
+    if (i >= startRow && (i - startRow) % interval === 0) {
+      reminders.push(i);
+    }
+  }
+  return reminders;
+}
+
 // ==========================================
-// 5. 作品管理邏輯 (新增 / 編輯 / 刪除)
+// 5. 作品管理邏輯
 // ==========================================
-// 新增作品
 addProjectBtn.addEventListener('click', () => {
   const name = newProjectInput.value.trim();
   if (!name) {
@@ -111,13 +128,11 @@ addProjectBtn.addEventListener('click', () => {
   saveToStorage();
 });
 
-// 切換作品
 projectSelect.addEventListener('change', (e) => {
   currentProjectId = Number(e.target.value);
   saveToStorage();
 });
 
-// 🌟 新增：修改當前作品名稱
 editProjectBtn.addEventListener('click', () => {
   const currentProject = projects.find(p => p.id === currentProjectId);
   if (!currentProject) return;
@@ -129,12 +144,11 @@ editProjectBtn.addEventListener('click', () => {
   }
 });
 
-// 🌟 新增：刪除當前作品
 deleteProjectBtn.addEventListener('click', () => {
   const currentProject = projects.find(p => p.id === currentProjectId);
   if (!currentProject) return;
 
-  if (confirm(`確定要刪除作品「${currentProject.name}」嗎？裡面的所有區塊都會被刪除喔！`)) {
+  if (confirm(`確定要刪除作品「${currentProject.name}」嗎？`)) {
     projects = projects.filter(p => p.id !== currentProjectId);
 
     if (projects.length > 0) {
@@ -172,11 +186,21 @@ addBtn.addEventListener('click', () => {
     currentProject.sections = [];
   }
 
+  const defaultInterval = 4;
+  const defaultStart = 1;
+
   const newSection = {
     id: Date.now(),
     name: name,
     current: 0,
-    total: total
+    total: total,
+    hasReminder: false,
+    actionType: 'increase',
+    interval: defaultInterval,
+    startRow: defaultStart,
+    customReminders: calculateDefaultReminders(total, defaultInterval, defaultStart),
+    mode: 'progress',
+    notes: ""
   };
 
   currentProject.sections.push(newSection);
@@ -202,9 +226,7 @@ function render() {
   const currentProject = projects.find(p => p.id === currentProjectId);
   if (!currentProject) return;
 
-  if (!currentProject.sections) {
-    currentProject.sections = [];
-  }
+  if (!currentProject.sections) currentProject.sections = [];
 
   currentProjectTitle.textContent = `${currentProject.name} - 區塊列表`;
   counterList.innerHTML = '';
@@ -222,12 +244,82 @@ function render() {
     const statusText = isCompleted ? '🎉 已完成' : '進行中';
     const statusClass = isCompleted ? 'status-badge completed' : 'status-badge';
 
-    let gridHTML = '<div class="grid-container">';
+    // 提醒控制列 HTML 渲染
+    let reminderBarHTML = '';
+    let modeSwitchBarHTML = '';
+
+    if (!section.hasReminder) {
+      reminderBarHTML = `
+        <div class="reminder-toggle-bar">
+          <button class="btn-add-reminder" onclick="toggleReminder(${section.id}, true)">
+            + 新增加減針提醒
+          </button>
+        </div>`;
+    } else {
+      reminderBarHTML = `
+        <div class="card-setting-bar">
+          <span>⚠️ 提醒：</span>
+          <select onchange="updateSectionActionType(${section.id}, this.value)">
+            <option value="increase" ${section.actionType === 'increase' ? 'selected' : ''}>➕ 加針</option>
+            <option value="decrease" ${section.actionType === 'decrease' ? 'selected' : ''}>➖ 減針</option>
+          </select>
+          <span>每</span>
+          <input type="number" min="1" value="${section.interval}" 
+                 onchange="updateSectionInterval(${section.id}, this.value)">
+          <span>行，從第</span>
+          <input type="number" min="1" value="${section.startRow}" 
+                 onchange="updateSectionStartRow(${section.id}, this.value)">
+          <span>行開始</span>
+          <button class="btn-remove-reminder" onclick="toggleReminder(${section.id}, false)" title="關閉提醒">✕ 移除</button>
+        </div>`;
+
+      const isEditMode = section.mode === 'edit';
+      modeSwitchBarHTML = `
+        <div class="mode-switch-bar">
+          <button class="btn-mode ${!isEditMode ? 'active' : ''}" onclick="switchSectionMode(${section.id}, 'progress')">
+            📍 點擊記錄進度
+          </button>
+          <button class="btn-mode ${isEditMode ? 'active edit-mode' : ''}" onclick="switchSectionMode(${section.id}, 'edit')">
+            ✏️ 點擊標記提醒 (手動微調)
+          </button>
+        </div>`;
+    }
+
+    // 格子渲染與判斷
+    const editModeClass = (section.hasReminder && section.mode === 'edit') ? 'edit-mode-active' : '';
+    let gridHTML = `<div class="grid-container ${editModeClass}">`;
+
     for (let i = 0; i < section.total; i++) {
+      const rowNumber = i + 1;
       const isFilled = i < section.current ? 'filled' : '';
-      gridHTML += `<div class="grid-square ${isFilled}" title="第 ${i + 1} 行" onclick="setRow(${section.id}, ${i + 1})"></div>`;
+      
+      const isReminderRow = section.hasReminder && Array.isArray(section.customReminders) && section.customReminders.includes(rowNumber);
+
+      let reminderClass = '';
+      let tagText = '';
+      if (isReminderRow) {
+        if (section.actionType === 'increase') {
+          reminderClass = 'reminder-increase';
+          tagText = '<span class="grid-tag">+加</span>';
+        } else {
+          reminderClass = 'reminder-decrease';
+          tagText = '<span class="grid-tag">-減</span>';
+        }
+      }
+
+      gridHTML += `
+        <div class="grid-square ${isFilled} ${reminderClass}" 
+             title="第 ${rowNumber} 行 ${isReminderRow ? (section.actionType === 'increase' ? '⚠️ 加針提醒' : '⚠️ 減針提醒') : ''}" 
+             onclick="handleGridClick(${section.id}, ${rowNumber})">
+          <span>${rowNumber}</span>
+          ${tagText}
+        </div>`;
     }
     gridHTML += '</div>';
+
+    // 🌟【判斷減針模式以給予紫色 class】
+    const isDecreaseMode = section.hasReminder && section.actionType === 'decrease';
+    const currentRowClass = isDecreaseMode ? 'current-row is-decrease' : 'current-row';
 
     const card = document.createElement('div');
     card.className = 'counter-card';
@@ -244,15 +336,23 @@ function render() {
         </div>
       </div>
 
+      ${reminderBarHTML}
+      ${modeSwitchBarHTML}
+
       ${gridHTML}
 
       <div class="progress-info">
-        <span class="current-row">${section.current}</span> / <span class="total-row">${section.total}</span> 行
+        <span class="${currentRowClass}">${section.current}</span> / <span class="total-row">${section.total}</span> 行
       </div>
 
       <div class="button-group">
         <button class="btn-counter btn-minus" onclick="changeRow(${section.id}, -1)">-1 行</button>
         <button class="btn-counter btn-plus" onclick="changeRow(${section.id}, 1)">+1 行</button>
+      </div>
+
+      <div class="card-notes-area">
+        <textarea placeholder="📝 填寫區塊筆記 (例: 4.0mm 棒針、第 10 行右二併針...)" 
+                  onchange="updateSectionNotes(${section.id}, this.value)">${section.notes || ''}</textarea>
       </div>
     `;
 
@@ -261,27 +361,87 @@ function render() {
 }
 
 // ==========================================
-// 8. 卡片互動邏輯
+// 8. 互動與設定更新邏輯
 // ==========================================
+
+window.handleGridClick = function(sectionId, rowNumber) {
+  const section = getActiveSection(sectionId);
+  if (!section) return;
+
+  if (section.hasReminder && section.mode === 'edit') {
+    if (!Array.isArray(section.customReminders)) {
+      section.customReminders = [];
+    }
+    const index = section.customReminders.indexOf(rowNumber);
+    if (index > -1) {
+      section.customReminders.splice(index, 1);
+    } else {
+      section.customReminders.push(rowNumber);
+    }
+    saveToStorage();
+  } else {
+    if (section.current === rowNumber) {
+      section.current = rowNumber - 1;
+    } else {
+      section.current = rowNumber;
+    }
+    saveToStorage();
+  }
+};
+
+window.switchSectionMode = function(sectionId, mode) {
+  const section = getActiveSection(sectionId);
+  if (!section) return;
+  section.mode = mode;
+  saveToStorage();
+};
+
+window.toggleReminder = function(sectionId, enable) {
+  const section = getActiveSection(sectionId);
+  if (!section) return;
+  section.hasReminder = enable;
+  if (enable && (!section.customReminders || section.customReminders.length === 0)) {
+    section.customReminders = calculateDefaultReminders(section.total, section.interval, section.startRow);
+  }
+  saveToStorage();
+};
+
+window.updateSectionActionType = function(sectionId, type) {
+  const section = getActiveSection(sectionId);
+  if (!section) return;
+  section.actionType = type;
+  saveToStorage();
+};
+
+window.updateSectionInterval = function(sectionId, value) {
+  const section = getActiveSection(sectionId);
+  if (!section) return;
+  section.interval = parseInt(value) || 1;
+  section.customReminders = calculateDefaultReminders(section.total, section.interval, section.startRow);
+  saveToStorage();
+};
+
+window.updateSectionStartRow = function(sectionId, value) {
+  const section = getActiveSection(sectionId);
+  if (!section) return;
+  section.startRow = parseInt(value) || 1;
+  section.customReminders = calculateDefaultReminders(section.total, section.interval, section.startRow);
+  saveToStorage();
+};
+
+window.updateSectionNotes = function(sectionId, value) {
+  const section = getActiveSection(sectionId);
+  if (!section) return;
+  section.notes = value.trim();
+  saveToStorage();
+};
+
 window.changeRow = function (sectionId, delta) {
   const section = getActiveSection(sectionId);
   if (!section) return;
 
   section.current += delta;
   if (section.current < 0) section.current = 0;
-
-  saveToStorage();
-};
-
-window.setRow = function (sectionId, targetRow) {
-  const section = getActiveSection(sectionId);
-  if (!section) return;
-
-  if (section.current === targetRow) {
-    section.current = targetRow - 1;
-  } else {
-    section.current = targetRow;
-  }
 
   saveToStorage();
 };
