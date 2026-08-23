@@ -3,7 +3,6 @@
 // ==========================================
 console.log("🔍 開始初始化 Firebase...");
 
-// firebaseConfig 已經由外部的 config.js 提供
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
@@ -13,11 +12,8 @@ const dbRef = database.ref(`knitting_apps/${syncRoomId}`);
 // ==========================================
 // 2. DOM 元件擷取
 // ==========================================
-const projectSelect = document.getElementById('project-select');
-const newProjectInput = document.getElementById('new-project-name');
+const projectList = document.getElementById('project-list');
 const addProjectBtn = document.getElementById('add-project-btn');
-const editProjectBtn = document.getElementById('edit-project-btn');
-const deleteProjectBtn = document.getElementById('delete-project-btn');
 const currentProjectTitle = document.getElementById('current-project-title');
 
 const sectionNameInput = document.getElementById('section-name');
@@ -44,7 +40,6 @@ function listenToCloudStorage() {
     if (data) {
       projects = data.projects || [];
       
-      // 補全屬性預設值
       projects.forEach(p => {
         if (!p.sections) p.sections = [];
         p.sections.forEach(s => {
@@ -85,7 +80,6 @@ function saveToStorage() {
   });
 }
 
-// 計算預設提醒行數的輔助函式
 function calculateDefaultReminders(total, interval, startRow) {
   const reminders = [];
   if (interval <= 0) return reminders;
@@ -98,50 +92,47 @@ function calculateDefaultReminders(total, interval, startRow) {
 }
 
 // ==========================================
-// 5. 作品管理邏輯
+// 5. 作品管理邏輯 (側邊欄對話框模式)
 // ==========================================
 addProjectBtn.addEventListener('click', () => {
-  const name = newProjectInput.value.trim();
-  if (!name) {
-    alert('請輸入作品名稱！');
-    return;
-  }
+  const name = prompt('請輸入新作品名稱：');
+  if (name && name.trim() !== '') {
+    const newProject = {
+      id: Date.now(),
+      name: name.trim(),
+      sections: []
+    };
 
-  const newProject = {
-    id: Date.now(),
-    name: name,
-    sections: []
-  };
-
-  projects.push(newProject);
-  currentProjectId = newProject.id;
-  newProjectInput.value = '';
-  
-  saveToStorage();
-});
-
-projectSelect.addEventListener('change', (e) => {
-  currentProjectId = Number(e.target.value);
-  saveToStorage();
-});
-
-editProjectBtn.addEventListener('click', () => {
-  const currentProject = projects.find(p => p.id === currentProjectId);
-  if (!currentProject) return;
-
-  const newName = prompt('請輸入新的作品名稱：', currentProject.name);
-  if (newName && newName.trim() !== '') {
-    currentProject.name = newName.trim();
+    projects.push(newProject);
+    currentProjectId = newProject.id; // 自動進入新作品頁面
     saveToStorage();
   }
 });
 
-deleteProjectBtn.addEventListener('click', () => {
-  const currentProject = projects.find(p => p.id === currentProjectId);
-  if (!currentProject) return;
+window.selectProject = function(id) {
+  currentProjectId = id;
+  saveToStorage();
+};
 
-  if (confirm(`確定要刪除作品「${currentProject.name}」嗎？`)) {
-    projects = projects.filter(p => p.id !== currentProjectId);
+window.editProjectById = function(id, event) {
+  event.stopPropagation(); // 阻止觸發切換專案
+  const project = projects.find(p => p.id === id);
+  if (!project) return;
+
+  const newName = prompt('請輸入新的作品名稱：', project.name);
+  if (newName && newName.trim() !== '') {
+    project.name = newName.trim();
+    saveToStorage();
+  }
+};
+
+window.deleteProjectById = function(id, event) {
+  event.stopPropagation(); // 阻止觸發切換專案
+  const project = projects.find(p => p.id === id);
+  if (!project) return;
+
+  if (confirm(`確定要刪除作品「${project.name}」嗎？`)) {
+    projects = projects.filter(p => p.id !== id);
 
     if (projects.length > 0) {
       currentProjectId = projects[0].id;
@@ -157,7 +148,7 @@ deleteProjectBtn.addEventListener('click', () => {
 
     saveToStorage();
   }
-});
+};
 
 // ==========================================
 // 6. 區塊建立邏輯
@@ -207,13 +198,22 @@ addBtn.addEventListener('click', () => {
 // 7. 核心畫面渲染 (Render)
 // ==========================================
 function render() {
-  projectSelect.innerHTML = '';
+  // 渲染側邊欄階層作品清單
+  projectList.innerHTML = '';
   projects.forEach(p => {
-    const option = document.createElement('option');
-    option.value = p.id;
-    option.textContent = p.name;
-    if (p.id === currentProjectId) option.selected = true;
-    projectSelect.appendChild(option);
+    const li = document.createElement('li');
+    const isActive = p.id === currentProjectId;
+    li.className = `project-item ${isActive ? 'active' : ''}`;
+    li.onclick = () => selectProject(p.id);
+
+    li.innerHTML = `
+      <span class="project-name">🧵 ${p.name}</span>
+      <div class="project-item-tools">
+        <button class="btn-item-tool" onclick="editProjectById(${p.id}, event)" title="修改名稱">✏️</button>
+        <button class="btn-item-tool" onclick="deleteProjectById(${p.id}, event)" title="刪除作品">🗑️</button>
+      </div>
+    `;
+    projectList.appendChild(li);
   });
 
   const currentProject = projects.find(p => p.id === currentProjectId);
@@ -221,7 +221,7 @@ function render() {
 
   if (!currentProject.sections) currentProject.sections = [];
 
-  currentProjectTitle.textContent = `${currentProject.name} - 區塊列表`;
+  currentProjectTitle.textContent = `${currentProject.name}`;
   counterList.innerHTML = '';
 
   if (currentProject.sections.length === 0) {
@@ -243,7 +243,6 @@ function render() {
     }
     const statusClass = (isCompleted || section.isLocked) ? 'status-badge completed' : 'status-badge';
 
-    // 提醒控制列 HTML 渲染
     let reminderBarHTML = '';
     let modeSwitchBarHTML = '';
 
@@ -284,7 +283,6 @@ function render() {
         </div>`;
     }
 
-    // 格子渲染與判斷
     const editModeClass = (section.hasReminder && section.mode === 'edit') ? 'edit-mode-active' : '';
     let gridHTML = `<div class="grid-container ${editModeClass}">`;
 
@@ -322,12 +320,11 @@ function render() {
     const lockIcon = section.isLocked ? '🔒' : '🔓';
     const lockTitle = section.isLocked ? '解鎖區塊' : '鎖定區塊';
 
-    // 🔒 鎖定時的視覺反灰樣式 (透明度降低、背景色變淺)
     const lockedCardStyle = section.isLocked ? 'opacity: 0.6; background-color: #f7f9fa;' : '';
 
     const card = document.createElement('div');
     card.className = 'counter-card';
-    card.style.cssText = lockedCardStyle; // 套用視覺反灰
+    card.style.cssText = lockedCardStyle;
     card.innerHTML = `
       <div class="card-header">
         <div class="card-title-group">
@@ -373,10 +370,7 @@ function render() {
 
 window.handleGridClick = function(sectionId, rowNumber) {
   const section = getActiveSection(sectionId);
-  if (!section) return;
-
-  // 🔒 若已鎖定，靜默攔截（不執行動作、不跳出警告）
-  if (section.isLocked) return;
+  if (!section || section.isLocked) return;
 
   if (section.hasReminder && section.mode === 'edit') {
     if (!Array.isArray(section.customReminders)) {
@@ -448,10 +442,7 @@ window.updateSectionNotes = function(sectionId, value) {
 
 window.changeRow = function (sectionId, delta) {
   const section = getActiveSection(sectionId);
-  if (!section) return;
-
-  // 🔒 若已鎖定，靜默攔截（不執行動作、不跳出警告）
-  if (section.isLocked) return;
+  if (!section || section.isLocked) return;
 
   section.current += delta;
   if (section.current < 0) section.current = 0;
@@ -463,7 +454,7 @@ window.resetSection = function (sectionId) {
   if (confirm('確定要把這個區塊的行數歸零嗎？')) {
     const section = getActiveSection(sectionId);
     if (!section) return;
-    section.isLocked = false; // 歸零時自動解鎖
+    section.isLocked = false;
     section.current = 0;
     saveToStorage();
   }
@@ -490,7 +481,6 @@ window.deleteSection = function (sectionId) {
   }
 };
 
-// 📋【新功能】複製區塊（進度歸零）
 window.copySection = function (sectionId) {
   const currentProject = projects.find(p => p.id === currentProjectId);
   if (!currentProject || !currentProject.sections) return;
@@ -501,14 +491,13 @@ window.copySection = function (sectionId) {
   const duplicatedSection = JSON.parse(JSON.stringify(targetSection));
   duplicatedSection.id = Date.now();
   duplicatedSection.name = targetSection.name + " (複製)";
-  duplicatedSection.current = 0; // 🌟 複製時將行數進度歸零
-  duplicatedSection.isLocked = false; // 複製出來預設未鎖定
+  duplicatedSection.current = 0;
+  duplicatedSection.isLocked = false;
 
   currentProject.sections.push(duplicatedSection);
   saveToStorage();
 };
 
-// 🔒【新功能】切換鎖定狀態
 window.toggleLockSection = function (sectionId) {
   const section = getActiveSection(sectionId);
   if (!section) return;

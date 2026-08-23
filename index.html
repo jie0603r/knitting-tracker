@@ -10,49 +10,50 @@
 
   <div class="app-container">
     
-    <!-- 頁首標題區塊 -->
-    <header>
-      <h1>🧶 毛線編織計數器</h1>
-      <p class="subtitle">追蹤作品與每一個編織區塊</p>
-    </header>
+    <!-- 👈 左側邊欄：作品目錄區 -->
+    <aside class="sidebar">
+      <header class="sidebar-header">
+        <h1>🧶 編織計數器</h1>
+        <p class="subtitle">追蹤作品與每一個區塊</p>
+        <button id="add-project-btn" class="btn-add-project-sidebar">+ 新增作品</button>
+      </header>
 
-    <!-- 1. 作品選擇與建立區塊 -->
-    <section class="project-section">
-      <div class="project-selector-group">
-        <label for="project-select">選擇作品：</label>
-        <select id="project-select"></select>
-        <!-- 🌟 新增：作品修改與刪除按鈕 -->
-        <button id="edit-project-btn" class="btn-tool" title="修改作品名稱">✏️</button>
-        <button id="delete-project-btn" class="btn-tool" title="刪除作品">🗑️</button>
+      <div class="project-tree-container">
+        <div class="tree-title">📂 選擇作品</div>
+        <ul id="project-list" class="project-tree">
+          <!-- 由 JS 動態生成作品階層清單 -->
+        </ul>
       </div>
-      <div class="project-create-group">
-        <input type="text" id="new-project-name" placeholder="新作品名稱 (例: 暖灰羊毛衫)">
-        <button id="add-project-btn" class="btn-secondary">+ 新增作品</button>
-      </div>
-    </section>
+    </aside>
 
-    <!-- 2. 輸入區塊 (新增計數器) -->
-    <section class="input-section">
-      <h2>新增編織區塊</h2>
-      <div class="form-group">
-        <label for="section-name">區塊名稱：</label>
-        <input type="text" id="section-name" placeholder="例如：肩膀、左袖" autocomplete="off">
-      </div>
-      
-      <div class="form-group">
-        <label for="total-rows">目標總行數：</label>
-        <input type="number" id="total-rows" placeholder="例如：23" min="1">
+    <!-- 👉 右側主要內容區：區塊建立與卡片列表 -->
+    <main class="main-content">
+      <div class="main-header">
+        <h2 id="current-project-title">載入中...</h2>
       </div>
 
-      <button id="add-btn" class="btn-primary">建立區塊計數器</button>
-    </section>
+      <!-- 新增區塊表單 -->
+      <section class="input-section">
+        <h2>新增編織區塊</h2>
+        <div class="form-group">
+          <label for="section-name">區塊名稱：</label>
+          <input type="text" id="section-name" placeholder="例如：肩膀、左袖" autocomplete="off">
+        </div>
+        
+        <div class="form-group">
+          <label for="total-rows">目標總行數：</label>
+          <input type="number" id="total-rows" placeholder="例如：23" min="1">
+        </div>
 
-    <!-- 3. 計數卡片展示區塊 -->
-    <main class="counter-display-area">
-      <h2 id="current-project-title">編織區塊列表</h2>
-      <div id="counter-list" class="counter-list">
-        <!-- 動態卡片將透過 JavaScript 渲染於此 -->
-      </div>
+        <button id="add-btn" class="btn-primary">建立區塊計數器</button>
+      </section>
+
+      <!-- 計數卡片展示區塊 -->
+      <section class="counter-display-area">
+        <div id="counter-list" class="counter-list">
+          <!-- 動態卡片將透過 JavaScript 渲染於此 -->
+        </div>
+      </section>
     </main>
 
   </div>
@@ -61,7 +62,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-  <!-- 我們專案的邏輯主程式 -->
+  <!-- 專案邏輯腳本 -->
   <script src="config.js"></script>
   <script src="script.js"></script>
 
