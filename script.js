@@ -17,6 +17,7 @@ const currentProjectTitle = document.getElementById('current-project-title');
 const sectionNameInput = document.getElementById('section-name');
 const totalRowsInput = document.getElementById('total-rows');
 const totalInputLabel = document.getElementById('total-input-label');
+const unitToggleBtn = document.getElementById('unit-toggle-btn');
 const addBtn = document.getElementById('add-btn');
 const counterList = document.getElementById('counter-list');
 
@@ -26,6 +27,7 @@ const counterList = document.getElementById('counter-list');
 let projects = [];
 let currentProjectId = null;
 let currentCreateType = 'knitting'; // 'knitting' 或 'check'
+let currentUnit = 'row'; // 'row' (行) 或 'cm' (公分)
 
 // ==========================================
 // 4. 網頁初始化與 Firebase 即時同步
@@ -44,6 +46,7 @@ function listenToCloudStorage() {
         if (!p.sections) p.sections = [];
         p.sections.forEach(s => {
           if (!s.type) s.type = 'knitting';
+          if (!s.unit) s.unit = 'row';
           if (s.hasReminder === undefined) s.hasReminder = false;
           if (s.actionType === undefined) s.actionType = 'increase';
           if (s.interval === undefined) s.interval = 4;
@@ -93,8 +96,19 @@ function calculateDefaultReminders(total, interval, startRow) {
 }
 
 // ==========================================
-// 5. 切換建立模式 (編織區塊 vs 針數檢查)
+// 5. 微型單位切換 & 建立模式切換
 // ==========================================
+window.toggleUnit = function() {
+  currentUnit = (currentUnit === 'row') ? 'cm' : 'row';
+  if (currentUnit === 'row') {
+    unitToggleBtn.textContent = '行';
+    totalRowsInput.placeholder = '例如：23';
+  } else {
+    unitToggleBtn.textContent = 'cm';
+    totalRowsInput.placeholder = '例如：15';
+  }
+};
+
 window.switchCreateType = function(type) {
   currentCreateType = type;
   const btnKnitting = document.getElementById('btn-type-knitting');
@@ -103,20 +117,22 @@ window.switchCreateType = function(type) {
   if (type === 'knitting') {
     btnKnitting.classList.add('active');
     btnCheck.classList.remove('active');
-    totalInputLabel.textContent = "目標總行數：";
-    totalRowsInput.placeholder = "例如：23";
+    totalInputLabel.textContent = "目標總數：";
+    totalRowsInput.placeholder = currentUnit === 'row' ? "例如：23" : "例如：15";
+    unitToggleBtn.style.display = "inline-block";
     addBtn.textContent = "建立編織區塊";
   } else {
     btnCheck.classList.add('active');
     btnKnitting.classList.remove('active');
     totalInputLabel.textContent = "目標總針數：";
     totalRowsInput.placeholder = "例如：80";
+    unitToggleBtn.style.display = "none";
     addBtn.textContent = "建立針數檢查";
   }
 };
 
 // ==========================================
-// 6. 作品管理邏輯 (新增、修改、刪除)
+// 6. 作品管理邏輯
 // ==========================================
 addProjectBtn.addEventListener('click', () => {
   const name = prompt('請輸入新作品名稱：');
@@ -182,7 +198,7 @@ addBtn.addEventListener('click', () => {
   const total = parseInt(totalRowsInput.value);
 
   if (!name || isNaN(total) || total <= 0) {
-    const errorMsg = currentCreateType === 'knitting' ? '請輸入有效的區塊名稱與目標總行數！' : '請輸入有效的區塊名稱與目標總針數！';
+    const errorMsg = currentCreateType === 'knitting' ? '請輸入有效的區塊名稱與目標總數！' : '請輸入有效的區塊名稱與目標總針數！';
     alert(errorMsg);
     return;
   }
@@ -200,6 +216,7 @@ addBtn.addEventListener('click', () => {
   const newSection = {
     id: Date.now(),
     type: currentCreateType,
+    unit: currentCreateType === 'check' ? 'stitch' : currentUnit,
     name: name,
     current: 0,
     total: total,
@@ -259,6 +276,7 @@ function render() {
 
   currentProject.sections.forEach(section => {
     const isCheckType = section.type === 'check';
+    const isCmUnit = section.unit === 'cm';
     const isCompleted = section.current >= section.total;
     
     let statusText = isCheckType ? '🔍 待檢查' : '進行中';
@@ -307,76 +325,82 @@ function render() {
       // 🧶 一般編織計數卡片版面
       let reminderBarHTML = '';
       let modeSwitchBarHTML = '';
+      let gridHTML = '';
 
-      if (!section.hasReminder) {
-        reminderBarHTML = `
-          <div class="reminder-toggle-bar">
-            <button class="btn-add-reminder" onclick="toggleReminder(${section.id}, true)">
-              + 新增加減針提醒
-            </button>
-          </div>`;
-      } else {
-        reminderBarHTML = `
-          <div class="card-setting-bar">
-            <span>⚠️ 提醒：</span>
-            <select onchange="updateSectionActionType(${section.id}, this.value)">
-              <option value="increase" ${section.actionType === 'increase' ? 'selected' : ''}>➕ 加針</option>
-              <option value="decrease" ${section.actionType === 'decrease' ? 'selected' : ''}>➖ 減針</option>
-            </select>
-            <span>每</span>
-            <input type="number" min="1" value="${section.interval}" 
-                   onchange="updateSectionInterval(${section.id}, this.value)">
-            <span>行，從第</span>
-            <input type="number" min="1" value="${section.startRow}" 
-                   onchange="updateSectionStartRow(${section.id}, this.value)">
-            <span>行開始</span>
-            <button class="btn-remove-reminder" onclick="toggleReminder(${section.id}, false)" title="關閉提醒">✕ 移除</button>
-          </div>`;
+      // 只有在非 cm 模式（行數模式）下才顯示提醒設定與格子方框
+      if (!isCmUnit) {
+        if (!section.hasReminder) {
+          reminderBarHTML = `
+            <div class="reminder-toggle-bar">
+              <button class="btn-add-reminder" onclick="toggleReminder(${section.id}, true)">
+                + 新增加減針提醒
+              </button>
+            </div>`;
+        } else {
+          reminderBarHTML = `
+            <div class="card-setting-bar">
+              <span>⚠️ 提醒：</span>
+              <select onchange="updateSectionActionType(${section.id}, this.value)">
+                <option value="increase" ${section.actionType === 'increase' ? 'selected' : ''}>➕ 加針</option>
+                <option value="decrease" ${section.actionType === 'decrease' ? 'selected' : ''}>➖ 減針</option>
+              </select>
+              <span>每</span>
+              <input type="number" min="1" value="${section.interval}" 
+                     onchange="updateSectionInterval(${section.id}, this.value)">
+              <span>行，從第</span>
+              <input type="number" min="1" value="${section.startRow}" 
+                     onchange="updateSectionStartRow(${section.id}, this.value)">
+              <span>行開始</span>
+              <button class="btn-remove-reminder" onclick="toggleReminder(${section.id}, false)" title="關閉提醒">✕ 移除</button>
+            </div>`;
 
-        const isEditMode = section.mode === 'edit';
-        modeSwitchBarHTML = `
-          <div class="mode-switch-bar">
-            <button class="btn-mode ${!isEditMode ? 'active' : ''}" onclick="switchSectionMode(${section.id}, 'progress')">
-              📍 點擊記錄進度
-            </button>
-            <button class="btn-mode ${isEditMode ? 'active edit-mode' : ''}" onclick="switchSectionMode(${section.id}, 'edit')">
-              ✏️ 點擊標記提醒 (手動微調)
-            </button>
-          </div>`;
-      }
-
-      const editModeClass = (section.hasReminder && section.mode === 'edit') ? 'edit-mode-active' : '';
-      let gridHTML = `<div class="grid-container ${editModeClass}">`;
-
-      for (let i = 0; i < section.total; i++) {
-        const rowNumber = i + 1;
-        const isFilled = i < section.current ? 'filled' : '';
-        const isReminderRow = section.hasReminder && Array.isArray(section.customReminders) && section.customReminders.includes(rowNumber);
-
-        let reminderClass = '';
-        let tagText = '';
-        if (isReminderRow) {
-          if (section.actionType === 'increase') {
-            reminderClass = 'reminder-increase';
-            tagText = '<span class="grid-tag">+加</span>';
-          } else {
-            reminderClass = 'reminder-decrease';
-            tagText = '<span class="grid-tag">-減</span>';
-          }
+          const isEditMode = section.mode === 'edit';
+          modeSwitchBarHTML = `
+            <div class="mode-switch-bar">
+              <button class="btn-mode ${!isEditMode ? 'active' : ''}" onclick="switchSectionMode(${section.id}, 'progress')">
+                📍 點擊記錄進度
+              </button>
+              <button class="btn-mode ${isEditMode ? 'active edit-mode' : ''}" onclick="switchSectionMode(${section.id}, 'edit')">
+                ✏️ 點擊標記提醒 (手動微調)
+              </button>
+            </div>`;
         }
 
-        gridHTML += `
-          <div class="grid-square ${isFilled} ${reminderClass}" 
-               title="第 ${rowNumber} 行 ${isReminderRow ? (section.actionType === 'increase' ? '⚠️ 加針提醒' : '⚠️ 減針提醒') : ''}" 
-               onclick="handleGridClick(${section.id}, ${rowNumber})">
-            <span>${rowNumber}</span>
-            ${tagText}
-          </div>`;
+        const editModeClass = (section.hasReminder && section.mode === 'edit') ? 'edit-mode-active' : '';
+        gridHTML = `<div class="grid-container ${editModeClass}">`;
+
+        const totalGrids = section.total;
+        for (let i = 0; i < totalGrids; i++) {
+          const rowNumber = i + 1;
+          const isFilled = i < section.current ? 'filled' : '';
+          const isReminderRow = section.hasReminder && Array.isArray(section.customReminders) && section.customReminders.includes(rowNumber);
+
+          let reminderClass = '';
+          let tagText = '';
+          if (isReminderRow) {
+            if (section.actionType === 'increase') {
+              reminderClass = 'reminder-increase';
+              tagText = '<span class="grid-tag">+加</span>';
+            } else {
+              reminderClass = 'reminder-decrease';
+              tagText = '<span class="grid-tag">-減</span>';
+            }
+          }
+
+          gridHTML += `
+            <div class="grid-square ${isFilled} ${reminderClass}" 
+                 title="第 ${rowNumber} 行 ${isReminderRow ? (section.actionType === 'increase' ? '⚠️ 加針提醒' : '⚠️ 減針提醒') : ''}" 
+                 onclick="handleGridClick(${section.id}, ${rowNumber})">
+              <span>${rowNumber}</span>
+              ${tagText}
+            </div>`;
+        }
+        gridHTML += '</div>';
       }
-      gridHTML += '</div>';
 
       const isDecreaseMode = section.hasReminder && section.actionType === 'decrease';
       const currentRowClass = isDecreaseMode ? 'current-row is-decrease' : 'current-row';
+      const unitLabelText = isCmUnit ? 'cm' : '行';
 
       card.innerHTML = `
         <div class="card-header">
@@ -399,7 +423,7 @@ function render() {
         ${gridHTML}
 
         <div class="progress-info">
-          <span class="${currentRowClass}">${section.current}</span> / <span class="total-row">${section.total}</span> 行
+          <span class="${currentRowClass}">${section.current}</span> 行 / <span class="total-row">${section.total} ${unitLabelText}</span>
         </div>
 
         <div class="button-group">

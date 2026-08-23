@@ -32,7 +32,7 @@
         <h2 id="current-project-title">載入中...</h2>
       </div>
 
-      <!-- 新增區塊表單 (支援左右並排按鈕切換模式) -->
+      <!-- 新增區塊表單 (支援微型單位切換與模式切換) -->
       <section class="input-section">
         <div class="input-type-toggle">
           <button id="btn-type-knitting" class="btn-type-tab active" onclick="switchCreateType('knitting')">🧶 新增編織區塊</button>
@@ -45,8 +45,11 @@
         </div>
         
         <div class="form-group">
-          <label id="total-input-label" for="total-rows">目標總行數：</label>
-          <input type="number" id="total-rows" placeholder="例如：23" min="1">
+          <label id="total-input-label" for="total-rows">目標總數：</label>
+          <div class="input-unit-wrapper">
+            <input type="number" id="total-rows" placeholder="例如：23" min="1">
+            <button type="button" id="unit-toggle-btn" class="btn-unit-toggle" onclick="toggleUnit()">行</button>
+          </div>
         </div>
 
         <button id="add-btn" class="btn-primary">建立編織區塊</button>
