@@ -32,20 +32,24 @@
         <h2 id="current-project-title">載入中...</h2>
       </div>
 
-      <!-- 新增區塊表單 -->
+      <!-- 新增區塊表單 (支援左右並排按鈕切換模式) -->
       <section class="input-section">
-        <h2>新增編織區塊</h2>
+        <div class="input-type-toggle">
+          <button id="btn-type-knitting" class="btn-type-tab active" onclick="switchCreateType('knitting')">🧶 新增編織區塊</button>
+          <button id="btn-type-check" class="btn-type-tab" onclick="switchCreateType('check')">🔍 新增針數檢查</button>
+        </div>
+
         <div class="form-group">
           <label for="section-name">區塊名稱：</label>
-          <input type="text" id="section-name" placeholder="例如：肩膀、左袖" autocomplete="off">
+          <input type="text" id="section-name" placeholder="例如：肩膀、袖口針數確認" autocomplete="off">
         </div>
         
         <div class="form-group">
-          <label for="total-rows">目標總行數：</label>
+          <label id="total-input-label" for="total-rows">目標總行數：</label>
           <input type="number" id="total-rows" placeholder="例如：23" min="1">
         </div>
 
-        <button id="add-btn" class="btn-primary">建立區塊計數器</button>
+        <button id="add-btn" class="btn-primary">建立編織區塊</button>
       </section>
 
       <!-- 計數卡片展示區塊 -->

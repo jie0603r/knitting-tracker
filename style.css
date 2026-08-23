@@ -15,7 +15,7 @@ body {
   min-height: 100vh;
 }
 
-/* 主容器：改為雙欄 Flex 佈局 */
+/* 主容器：雙欄 Flex 佈局 */
 .app-container {
   width: 100%;
   max-width: 960px;
@@ -70,7 +70,6 @@ body {
   background-color: #0984e3;
 }
 
-/* 樹狀階層作品清單 */
 .project-tree-container {
   flex: 1;
 }
@@ -84,7 +83,7 @@ body {
 
 .project-tree {
   list-style: none;
-  padding-left: 8px;
+  padding-left: 0;
 }
 
 .project-item {
@@ -125,7 +124,7 @@ body {
 /* 👉 右側主要內容區 */
 .main-content {
   flex: 1;
-  min-width: 0; /* 防止子元素溢出 Flex 容器 */
+  min-width: 0;
 }
 
 .main-header h2 {
@@ -136,7 +135,7 @@ body {
   padding-bottom: 8px;
 }
 
-/* 表單與輸入區 */
+/* 表單與模式切換按鈕區 */
 .input-section {
   background: #ffffff;
   border: 1px solid #eccc68;
@@ -145,12 +144,29 @@ body {
   margin-bottom: 24px;
 }
 
-.input-section h2 {
-  font-size: 1.05rem;
-  margin-bottom: 12px;
-  color: #d35400;
-  border-bottom: none;
-  padding-bottom: 0;
+.input-type-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.btn-type-tab {
+  flex: 1;
+  padding: 8px 12px;
+  background-color: #f1f2f6;
+  color: #636e72;
+  border: 1px solid #dfe4ea;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-type-tab.active {
+  background-color: #e67e22;
+  color: #ffffff;
+  border-color: #d35400;
 }
 
 .form-group {
@@ -205,6 +221,28 @@ button {
   opacity: 1;
 }
 
+/* 針數檢查特有展示區域 */
+.stitch-check-box {
+  text-align: center;
+  background-color: #f8fafc;
+  border: 2px dashed #00b894;
+  border-radius: 12px;
+  padding: 18px 12px;
+  margin: 12px 0;
+}
+
+.stitch-check-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #00b894;
+}
+
+.stitch-check-label {
+  font-size: 0.85rem;
+  color: #636e72;
+  margin-top: 4px;
+}
+
 /* 卡片與列表區塊 */
 .counter-list {
   display: flex;
@@ -246,7 +284,7 @@ button {
   color: #00b894;
 }
 
-/* 開啟/關閉提醒按鈕區 */
+/* 提醒列與設定 */
 .reminder-toggle-bar {
   margin-bottom: 12px;
 }
@@ -265,7 +303,6 @@ button {
   color: #2d3436;
 }
 
-/* 加減針設定列 */
 .card-setting-bar {
   display: flex;
   align-items: center;
@@ -307,7 +344,7 @@ button {
   color: white;
 }
 
-/* 模式切換列 (記錄進度 vs 標記提醒) */
+/* 模式切換列 */
 .mode-switch-bar {
   display: flex;
   gap: 6px;
@@ -371,14 +408,12 @@ button {
   transform: scale(1.05);
 }
 
-/* 已完成的格子 */
 .grid-square.filled {
   background-color: #74b9ff;
   border-color: #0984e3;
   color: #ffffff;
 }
 
-/* 加針格子的視覺樣式 */
 .grid-square.reminder-increase {
   border: 2px solid #e67e22 !important;
   box-shadow: 0 0 4px rgba(230, 126, 34, 0.4);
@@ -390,7 +425,6 @@ button {
   color: #ffffff;
 }
 
-/* 減針格子的視覺樣式 */
 .grid-square.reminder-decrease {
   border: 2px solid #9b59b6 !important;
   box-shadow: 0 0 4px rgba(155, 89, 182, 0.4);
@@ -402,7 +436,6 @@ button {
   color: #ffffff;
 }
 
-/* 格子內小標籤 */
 .grid-tag {
   font-size: 0.55rem;
   line-height: 1;
@@ -440,7 +473,6 @@ button {
   font-weight: 600;
 }
 
-/* 目前行數：預設橘色大字體 */
 .progress-info .current-row {
   font-size: 1.8rem;
   font-weight: 800;
@@ -453,7 +485,6 @@ button {
   color: #9b59b6 !important;
 }
 
-/* 預定總行數 */
 .progress-info .total-row {
   font-size: 1.1rem;
   font-weight: 600;
