@@ -44,7 +44,7 @@ function listenToCloudStorage() {
     if (data) {
       projects = data.projects || [];
       
-      // 補全屬性預設值（包含新增的 isLocked）
+      // 補全屬性預設值
       projects.forEach(p => {
         if (!p.sections) p.sections = [];
         p.sections.forEach(s => {
@@ -54,7 +54,7 @@ function listenToCloudStorage() {
           if (s.startRow === undefined) s.startRow = 1;
           if (s.notes === undefined) s.notes = "";
           if (s.mode === undefined) s.mode = 'progress';
-          if (s.isLocked === undefined) s.isLocked = false; // 🔒 確保舊資料也有鎖定狀態
+          if (s.isLocked === undefined) s.isLocked = false;
           if (!Array.isArray(s.customReminders)) {
             s.customReminders = calculateDefaultReminders(s.total, s.interval, s.startRow);
           }
@@ -193,7 +193,7 @@ addBtn.addEventListener('click', () => {
     customReminders: calculateDefaultReminders(total, defaultInterval, defaultStart),
     mode: 'progress',
     notes: "",
-    isLocked: false // 🔒 預設為未鎖定
+    isLocked: false
   };
 
   currentProject.sections.push(newSection);
@@ -235,7 +235,6 @@ function render() {
   currentProject.sections.forEach(section => {
     const isCompleted = section.current >= section.total;
     
-    // 🔒 狀態顯示：優先判斷是否鎖定
     let statusText = '進行中';
     if (section.isLocked) {
       statusText = '🔒 已鎖定';
@@ -317,16 +316,18 @@ function render() {
     }
     gridHTML += '</div>';
 
-    // 🌟【判斷減針模式以給予紫色 class】
     const isDecreaseMode = section.hasReminder && section.actionType === 'decrease';
     const currentRowClass = isDecreaseMode ? 'current-row is-decrease' : 'current-row';
 
-    // 🔒 鎖定按鈕圖示與提示文字切換
     const lockIcon = section.isLocked ? '🔒' : '🔓';
     const lockTitle = section.isLocked ? '解鎖區塊' : '鎖定區塊';
 
+    // 🔒 鎖定時的視覺反灰樣式 (透明度降低、背景色變淺)
+    const lockedCardStyle = section.isLocked ? 'opacity: 0.6; background-color: #f7f9fa;' : '';
+
     const card = document.createElement('div');
     card.className = 'counter-card';
+    card.style.cssText = lockedCardStyle; // 套用視覺反灰
     card.innerHTML = `
       <div class="card-header">
         <div class="card-title-group">
@@ -334,9 +335,9 @@ function render() {
           <span class="${statusClass}">${statusText}</span>
         </div>
         <div class="card-tools">
+          <button class="btn-tool" onclick="editSectionName(${section.id})" title="編輯名稱">✏️</button>
           <button class="btn-tool" onclick="copySection(${section.id})" title="複製區塊">📋</button>
           <button class="btn-tool" onclick="toggleLockSection(${section.id})" title="${lockTitle}">${lockIcon}</button>
-          <button class="btn-tool" onclick="editSectionName(${section.id})" title="編輯名稱">✏️</button>
           <button class="btn-tool" onclick="resetSection(${section.id})" title="歸零">🔄</button>
           <button class="btn-tool" onclick="deleteSection(${section.id})" title="刪除">🗑️</button>
         </div>
@@ -374,11 +375,8 @@ window.handleGridClick = function(sectionId, rowNumber) {
   const section = getActiveSection(sectionId);
   if (!section) return;
 
-  // 🔒 若已鎖定，阻止修改
-  if (section.isLocked) {
-    alert('此區塊已鎖定，無法修改進度！');
-    return;
-  }
+  // 🔒 若已鎖定，靜默攔截（不執行動作、不跳出警告）
+  if (section.isLocked) return;
 
   if (section.hasReminder && section.mode === 'edit') {
     if (!Array.isArray(section.customReminders)) {
@@ -452,11 +450,8 @@ window.changeRow = function (sectionId, delta) {
   const section = getActiveSection(sectionId);
   if (!section) return;
 
-  // 🔒 若已鎖定，阻止加減行數
-  if (section.isLocked) {
-    alert('此區塊已鎖定，無法修改行數！');
-    return;
-  }
+  // 🔒 若已鎖定，靜默攔截（不執行動作、不跳出警告）
+  if (section.isLocked) return;
 
   section.current += delta;
   if (section.current < 0) section.current = 0;
@@ -495,7 +490,7 @@ window.deleteSection = function (sectionId) {
   }
 };
 
-// 📋【新功能】複製區塊
+// 📋【新功能】複製區塊（進度歸零）
 window.copySection = function (sectionId) {
   const currentProject = projects.find(p => p.id === currentProjectId);
   if (!currentProject || !currentProject.sections) return;
@@ -503,11 +498,11 @@ window.copySection = function (sectionId) {
   const targetSection = currentProject.sections.find(s => s.id === sectionId);
   if (!targetSection) return;
 
-  // 複製一份完全一樣的物件資料，並賦予全新 ID 與加上「(複製)」名稱
   const duplicatedSection = JSON.parse(JSON.stringify(targetSection));
   duplicatedSection.id = Date.now();
   duplicatedSection.name = targetSection.name + " (複製)";
-  duplicatedSection.isLocked = false; // 複製出來預設為未鎖定
+  duplicatedSection.current = 0; // 🌟 複製時將行數進度歸零
+  duplicatedSection.isLocked = false; // 複製出來預設未鎖定
 
   currentProject.sections.push(duplicatedSection);
   saveToStorage();
