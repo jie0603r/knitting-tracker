@@ -33,83 +33,32 @@ let currentUnit = 'row'; // 'row' (行) 或 'cm' (公分)
 // 4. 網頁初始化、PWA 註冊與 Firebase 身份驗證
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  // 註冊 PWA Service Worker
+  // 1. 註冊 PWA Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
       .then((reg) => console.log('PWA Service Worker 註冊成功！範疇：', reg.scope))
       .catch((err) => console.error('PWA Service Worker 註冊失敗：', err));
   }
 
-  // 自動執行匿名驗證，獲得通行權限後才開啟即時資料連線
+  // 2. 自動執行匿名驗證
   firebase.auth().signInAnonymously()
-    .then(() => {
-      console.log("Firebase 身份驗證成功！");
+    .then((userCredential) => {
+      console.log("Firebase 身份驗證成功！UID:", userCredential.user.uid);
       listenToCloudStorage();
     })
     .catch((error) => {
-      console.error("Firebase 身份驗證失敗：", error);
-      alert("資料庫連線失敗，請確認 Authentication 已開啟匿名驗證功能。");
+      // 輸出詳細錯誤資訊至 Console 視窗以利排查
+      console.error("Firebase 身份驗證詳細錯誤：", error.code, error.message);
+      
+      if (error.code === 'auth/operation-not-allowed') {
+        alert("資料庫連線失敗：請前往 Firebase 控制台開啟 Authentication 的「匿名 (Anonymous)」驗證功能。");
+      } else if (error.code === 'auth/unauthorized-domain') {
+        alert("資料庫連線失敗：請將 jie0603r.github.io 新增至 Firebase Authentication 的授權網域 (Authorized Domains) 中。");
+      } else {
+        alert(`資料庫連線失敗 [${error.code}]：${error.message}`);
+      }
     });
 });
-
-function listenToCloudStorage() {
-  dbRef.on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      projects = data.projects || [];
-      
-      projects.forEach(p => {
-        if (!p.sections) p.sections = [];
-        p.sections.forEach(s => {
-          if (!s.type) s.type = 'knitting';
-          if (!s.unit) s.unit = 'row';
-          if (s.hasReminder === undefined) s.hasReminder = false;
-          if (s.actionType === undefined) s.actionType = 'increase';
-          if (s.interval === undefined) s.interval = 4;
-          if (s.startRow === undefined) s.startRow = 1;
-          if (s.notes === undefined) s.notes = "";
-          if (s.mode === undefined) s.mode = 'progress';
-          if (s.isLocked === undefined) s.isLocked = false;
-          if (!Array.isArray(s.customReminders)) {
-            s.customReminders = calculateDefaultReminders(s.total, s.interval, s.startRow);
-          }
-        });
-      });
-
-      currentProjectId = data.currentProjectId || (projects[0] ? projects[0].id : null);
-    } else {
-      projects = [{
-        id: Date.now(),
-        name: '我的第一件編織作品',
-        sections: []
-      }];
-      currentProjectId = projects[0].id;
-      saveToStorage();
-    }
-    render();
-  }, (error) => {
-    console.error("雲端讀取失敗：", error);
-  });
-}
-
-function saveToStorage() {
-  dbRef.set({
-    projects: projects,
-    currentProjectId: currentProjectId,
-    updatedAt: Date.now()
-  });
-}
-
-function calculateDefaultReminders(total, interval, startRow) {
-  const reminders = [];
-  if (interval <= 0) return reminders;
-  for (let i = 1; i <= total; i++) {
-    if (i >= startRow && (i - startRow) % interval === 0) {
-      reminders.push(i);
-    }
-  }
-  return reminders;
-}
 
 // ==========================================
 // 5. 微型單位切換 & 建立模式切換
