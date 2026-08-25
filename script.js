@@ -13,13 +13,14 @@ const dbRef = database.ref(`knitting_apps/${syncRoomId}`);
 let projects = [];
 let currentProjectId = null;
 let currentCreateType = 'knitting'; // 'knitting' 或 'check'
-let currentUnit = 'row'; // 'row' (行) 或 'cm' (公分)
+let currentUnit = 'row'; // 'row' 或 'cm'
 
 let projectList, addProjectBtn, currentProjectTitle;
 let sectionNameInput, totalRowsInput, totalInputLabel, unitToggleBtn, addBtn, counterList;
+let sidebar, sidebarOverlay;
 
 // ==========================================
-// 3. 核心資料儲存與邏輯函式 (優先宣告)
+// 3. 核心資料儲存與邏輯函式
 // ==========================================
 function saveToStorage() {
   dbRef.set({
@@ -38,6 +39,16 @@ function calculateDefaultReminders(total, interval, startRow) {
     }
   }
   return reminders;
+}
+
+function closeSidebar() {
+  if (sidebar) sidebar.classList.remove('active');
+  if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+}
+
+function openSidebar() {
+  if (sidebar) sidebar.classList.add('active');
+  if (sidebarOverlay) sidebarOverlay.classList.add('active');
 }
 
 function listenToCloudStorage() {
@@ -81,7 +92,7 @@ function listenToCloudStorage() {
 }
 
 // ==========================================
-// 4. 網頁初始化、PWA 註冊與 Firebase 驗證
+// 4. 網頁初始化、PWA 註冊與 DOM 綁定
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   // 綁定 DOM 元素
@@ -94,14 +105,20 @@ document.addEventListener('DOMContentLoaded', () => {
   unitToggleBtn = document.getElementById('unit-toggle-btn');
   addBtn = document.getElementById('add-btn');
   counterList = document.getElementById('counter-list');
+  sidebar = document.getElementById('sidebar');
+  sidebarOverlay = document.getElementById('sidebar-overlay');
+
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+
+  // 綁定手機版側邊欄事件
+  if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
+  if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
   // 綁定按鈕事件
-  if (addProjectBtn) {
-    addProjectBtn.addEventListener('click', handleAddProject);
-  }
-  if (addBtn) {
-    addBtn.addEventListener('click', handleAddSection);
-  }
+  if (addProjectBtn) addProjectBtn.addEventListener('click', handleAddProject);
+  if (addBtn) addBtn.addEventListener('click', handleAddSection);
 
   // 註冊 PWA Service Worker
   if ('serviceWorker' in navigator) {
@@ -123,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 5. 微型單位切換 & 建立模式切換
+// 5. 單位切換與類型切換
 // ==========================================
 window.toggleUnit = function() {
   currentUnit = (currentUnit === 'row') ? 'cm' : 'row';
@@ -173,12 +190,14 @@ function handleAddProject() {
     projects.push(newProject);
     currentProjectId = newProject.id;
     saveToStorage();
+    closeSidebar();
   }
 }
 
 window.selectProject = function(id) {
   currentProjectId = id;
   saveToStorage();
+  closeSidebar(); // 切換作品後自動收合手機版側邊欄
 };
 
 window.editProjectById = function(id, event) {
@@ -265,7 +284,7 @@ function handleAddSection() {
 }
 
 // ==========================================
-// 8. 核心畫面渲染 (Render)
+// 8. 畫面渲染 (Render)
 // ==========================================
 function render() {
   if (!projectList || !counterList) return;

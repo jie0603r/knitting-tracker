@@ -1,20 +1,25 @@
 {
-  "name": "🧶 毛線編織計數器",
-  "short_name": "編織計數",
+  "name": "編織記錄器 Knitting Tracker",
+  "short_name": "編織記錄器",
+  "description": "個人的編織段數與針數雲端計數器",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#e67e22",
+  "theme_color": "#4a90e2",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050158.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3050/3050158.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

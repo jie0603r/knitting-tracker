@@ -2,82 +2,78 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🧶 毛線編織計數器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>編織記錄器 Knitting Tracker</title>
   
-  <!-- PWA 設定 -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#e67e22">
-  
+  <!-- PWA 相關設定 -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#4a90e2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="編織記錄器">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3050/3050158.png">
+
   <link rel="stylesheet" href="style.css">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="config.js"></script>
 </head>
 <body>
 
-  <div class="app-container">
-    
-    <!-- 👈 左側邊欄：作品目錄區 -->
-    <aside class="sidebar">
-      <header class="sidebar-header">
-        <h1>🧶 編織計數器</h1>
-        <p class="subtitle">追蹤作品與每一個區塊</p>
-        <button id="add-project-btn" class="btn-add-project-sidebar">+ 新增作品</button>
-      </header>
+  <!-- 手機版浮動頂部列與漢堡選單按鈕 -->
+  <div class="mobile-header">
+    <button id="mobile-menu-btn" class="btn-mobile-menu">☰ 作品選單</button>
+    <span class="mobile-app-title">🧶 編織記錄器</span>
+  </div>
 
-      <div class="project-tree-container">
-        <div class="tree-title">📂 選擇作品</div>
-        <ul id="project-list" class="project-tree">
-          <!-- 由 JS 動態生成作品階層清單 -->
-        </ul>
+  <!-- 手機版側邊欄背景遮罩 -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <div class="app-container">
+    <!-- 側邊欄 -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h2>📂 作品清單</h2>
+        <button id="close-sidebar-btn" class="btn-close-sidebar">✕</button>
       </div>
+      <button id="add-project-btn" class="btn-primary">+ 新增作品</button>
+      <ul id="project-list" class="project-list"></ul>
     </aside>
 
-    <!-- 👉 右側主要內容區：區塊建立與卡片列表 -->
+    <!-- 主內容區 -->
     <main class="main-content">
-      <div class="main-header">
-        <h2 id="current-project-title">載入中...</h2>
-      </div>
+      <header class="header">
+        <h1 id="current-project-title">載入中...</h1>
+      </header>
 
-      <!-- 新增區塊表單 (支援微型單位切換與模式切換) -->
-      <section class="input-section">
-        <div class="input-type-toggle">
-          <button id="btn-type-knitting" class="btn-type-tab active" onclick="switchCreateType('knitting')">🧶 新增編織區塊</button>
-          <button id="btn-type-check" class="btn-type-tab" onclick="switchCreateType('check')">🔍 新增針數檢查</button>
+      <!-- 新增區塊表單 -->
+      <section class="card input-card">
+        <div class="create-type-switch">
+          <button id="btn-type-knitting" class="type-btn active" onclick="switchCreateType('knitting')">🧶 編織區塊</button>
+          <button id="btn-type-check" class="type-btn" onclick="switchCreateType('check')">🔍 針數檢查區塊</button>
         </div>
 
-        <div class="form-group">
-          <label for="section-name">區塊名稱：</label>
-          <input type="text" id="section-name" placeholder="例如：肩膀、袖口針數確認" autocomplete="off">
+        <div class="input-group">
+          <input type="text" id="section-name" placeholder="請輸入區塊名稱（如：左袖口）">
         </div>
-        
-        <div class="form-group">
+
+        <div class="input-group row-input-group">
           <label id="total-input-label" for="total-rows">目標總數：</label>
-          <div class="input-unit-wrapper">
-            <input type="number" id="total-rows" placeholder="例如：23" min="1">
-            <button type="button" id="unit-toggle-btn" class="btn-unit-toggle" onclick="toggleUnit()">行</button>
-          </div>
+          <input type="number" id="total-rows" min="1" placeholder="例如：23">
+          <button id="unit-toggle-btn" class="btn-unit-toggle" onclick="toggleUnit()">行</button>
         </div>
 
         <button id="add-btn" class="btn-primary">建立編織區塊</button>
       </section>
 
-      <!-- 計數卡片展示區塊 -->
-      <section class="counter-display-area">
-        <div id="counter-list" class="counter-list">
-          <!-- 動態卡片將透過 JavaScript 渲染於此 -->
-        </div>
-      </section>
+      <!-- 計數卡片清單區 -->
+      <section id="counter-list" class="counter-list"></section>
     </main>
-
   </div>
 
-  <!-- Firebase 雲端 SDK 連結 -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
-  <!-- 專案邏輯腳本 -->
-  <script src="config.js"></script>
   <script src="script.js"></script>
-
 </body>
 </html>

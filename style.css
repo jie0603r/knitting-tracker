@@ -554,3 +554,119 @@ button {
   background-color: #00b894;
   color: white;
 }
+
+/* ==========================================
+   RWD 自適應與手機版側邊欄樣式
+   ========================================== */
+
+/* 預設隱藏手機版專用元素 */
+.mobile-header {
+  display: none;
+}
+.btn-close-sidebar {
+  display: none;
+}
+.sidebar-overlay {
+  display: none;
+}
+
+/* 螢幕寬度 768px 以下 (手機與小型平板) */
+@media (max-width: 768px) {
+  /* 顯示手機版頂部列 */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-mobile-menu {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .mobile-app-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2d3748;
+  }
+
+  /* 調整容器為單欄排列 */
+  .app-container {
+    flex-direction: column;
+  }
+
+  /* 側邊欄轉為左側滑出式抽屜 (Off-Canvas) */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -290px; /* 預設完全隱藏在左邊外側 */
+    width: 270px;
+    height: 100vh;
+    background-color: #ffffff;
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  /* 當側邊欄加上 active 時滑出 */
+  .sidebar.active {
+    left: 0;
+  }
+
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .btn-close-sidebar {
+    display: inline-block;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #718096;
+    cursor: pointer;
+  }
+
+  /* 背景灰底遮罩 */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* 主內容區間距優化 */
+  .main-content {
+    padding: 16px;
+  }
+}
