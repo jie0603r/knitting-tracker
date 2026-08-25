@@ -30,9 +30,16 @@ let currentCreateType = 'knitting'; // 'knitting' 或 'check'
 let currentUnit = 'row'; // 'row' (行) 或 'cm' (公分)
 
 // ==========================================
-// 4. 網頁初始化與 Firebase 身份驗證 & 即時同步
+// 4. 網頁初始化、PWA 註冊與 Firebase 身份驗證
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+  // 註冊 PWA Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('PWA Service Worker 註冊成功！範疇：', reg.scope))
+      .catch((err) => console.error('PWA Service Worker 註冊失敗：', err));
+  }
+
   // 自動執行匿名驗證，獲得通行權限後才開啟即時資料連線
   firebase.auth().signInAnonymously()
     .then(() => {
