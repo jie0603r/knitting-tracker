@@ -26,7 +26,7 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
-/* 👈 側邊欄基礎樣式（電腦版） */
+/* 👈 電腦版側邊欄基礎樣式 */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
@@ -571,7 +571,7 @@ button {
 }
 
 /* ==========================================
-   📱 RWD 自適應與手機版抽屜設定
+   📱 手機版專屬修正排版 (RWD)
    ========================================== */
 .mobile-header {
   display: none;
@@ -584,6 +584,7 @@ button {
   body {
     padding: 0;
     display: block;
+    overflow-x: hidden;
   }
 
   .mobile-header {
@@ -616,41 +617,46 @@ button {
     color: #2d3748;
   }
 
+  /* 強制主容器改為直向顯示 */
   .app-container {
-    flex-direction: column;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
     border-radius: 0;
     box-shadow: none;
     padding: 16px;
-    gap: 0;
+    margin: 0;
   }
 
-  /* 手機版滑出抽屜 */
+  /* 徹底固定側邊欄為抽屜層，不佔用畫面寬度 */
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: -290px;
-    width: 270px;
-    height: 100vh;
-    background-color: #ffffff;
-    z-index: 1000;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
-    padding: 20px;
-    overflow-y: auto;
-    border-right: none;
-    margin-right: 0 !important;
-    white-space: normal;
+    position: fixed !important;
+    top: 0 !important;
+    left: -290px !important;
+    width: 270px !important;
+    height: 100vh !important;
+    background-color: #ffffff !important;
+    z-index: 1000 !important;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15) !important;
+    padding: 20px !important;
+    overflow-y: auto !important;
+    border-right: none !important;
+    margin: 0 !important;
+    white-space: normal !important;
+    transition: left 0.3s ease !important;
   }
 
-  /* 覆蓋電腦版 collapsed 狀態，確保手機版邏輯獨立 */
+  /* 覆蓋電腦版 collapsed 狀態，避免衝突 */
   .sidebar.collapsed {
     width: 270px !important;
+    margin: 0 !important;
     padding: 20px !important;
     opacity: 1 !important;
     pointer-events: auto !important;
   }
 
   .sidebar.active {
-    left: 0;
+    left: 0 !important;
   }
 
   .sidebar-overlay {
@@ -674,7 +680,8 @@ button {
   }
 
   .main-content {
-    padding: 0;
+    width: 100% !important;
+    padding: 0 !important;
   }
 
   .btn-desktop-menu {
