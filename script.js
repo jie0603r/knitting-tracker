@@ -8,55 +8,117 @@ const syncRoomId = "my-knitting-room";
 const dbRef = database.ref(`knitting_apps/${syncRoomId}`);
 
 // ==========================================
-// 2. DOM 元件擷取
-// ==========================================
-const projectList = document.getElementById('project-list');
-const addProjectBtn = document.getElementById('add-project-btn');
-const currentProjectTitle = document.getElementById('current-project-title');
-
-const sectionNameInput = document.getElementById('section-name');
-const totalRowsInput = document.getElementById('total-rows');
-const totalInputLabel = document.getElementById('total-input-label');
-const unitToggleBtn = document.getElementById('unit-toggle-btn');
-const addBtn = document.getElementById('add-btn');
-const counterList = document.getElementById('counter-list');
-
-// ==========================================
-// 3. 全局資料狀態
+// 2. 全局資料狀態與 DOM 變數宣告
 // ==========================================
 let projects = [];
 let currentProjectId = null;
 let currentCreateType = 'knitting'; // 'knitting' 或 'check'
 let currentUnit = 'row'; // 'row' (行) 或 'cm' (公分)
 
+let projectList, addProjectBtn, currentProjectTitle;
+let sectionNameInput, totalRowsInput, totalInputLabel, unitToggleBtn, addBtn, counterList;
+
 // ==========================================
-// 4. 網頁初始化、PWA 註冊與 Firebase 身份驗證
+// 3. 核心資料儲存與邏輯函式 (優先宣告)
+// ==========================================
+function saveToStorage() {
+  dbRef.set({
+    projects: projects,
+    currentProjectId: currentProjectId,
+    updatedAt: Date.now()
+  });
+}
+
+function calculateDefaultReminders(total, interval, startRow) {
+  const reminders = [];
+  if (interval <= 0) return reminders;
+  for (let i = 1; i <= total; i++) {
+    if (i >= startRow && (i - startRow) % interval === 0) {
+      reminders.push(i);
+    }
+  }
+  return reminders;
+}
+
+function listenToCloudStorage() {
+  dbRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      projects = data.projects || [];
+      
+      projects.forEach(p => {
+        if (!p.sections) p.sections = [];
+        p.sections.forEach(s => {
+          if (!s.type) s.type = 'knitting';
+          if (!s.unit) s.unit = 'row';
+          if (s.hasReminder === undefined) s.hasReminder = false;
+          if (s.actionType === undefined) s.actionType = 'increase';
+          if (s.interval === undefined) s.interval = 4;
+          if (s.startRow === undefined) s.startRow = 1;
+          if (s.notes === undefined) s.notes = "";
+          if (s.mode === undefined) s.mode = 'progress';
+          if (s.isLocked === undefined) s.isLocked = false;
+          if (!Array.isArray(s.customReminders)) {
+            s.customReminders = calculateDefaultReminders(s.total, s.interval, s.startRow);
+          }
+        });
+      });
+
+      currentProjectId = data.currentProjectId || (projects[0] ? projects[0].id : null);
+    } else {
+      projects = [{
+        id: Date.now(),
+        name: '我的第一件編織作品',
+        sections: []
+      }];
+      currentProjectId = projects[0].id;
+      saveToStorage();
+    }
+    render();
+  }, (error) => {
+    console.error("雲端讀取失敗：", error);
+  });
+}
+
+// ==========================================
+// 4. 網頁初始化、PWA 註冊與 Firebase 驗證
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. 註冊 PWA Service Worker
+  // 綁定 DOM 元素
+  projectList = document.getElementById('project-list');
+  addProjectBtn = document.getElementById('add-project-btn');
+  currentProjectTitle = document.getElementById('current-project-title');
+  sectionNameInput = document.getElementById('section-name');
+  totalRowsInput = document.getElementById('total-rows');
+  totalInputLabel = document.getElementById('total-input-label');
+  unitToggleBtn = document.getElementById('unit-toggle-btn');
+  addBtn = document.getElementById('add-btn');
+  counterList = document.getElementById('counter-list');
+
+  // 綁定按鈕事件
+  if (addProjectBtn) {
+    addProjectBtn.addEventListener('click', handleAddProject);
+  }
+  if (addBtn) {
+    addBtn.addEventListener('click', handleAddSection);
+  }
+
+  // 註冊 PWA Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
       .then((reg) => console.log('PWA Service Worker 註冊成功！範疇：', reg.scope))
       .catch((err) => console.error('PWA Service Worker 註冊失敗：', err));
   }
 
-  // 2. 自動執行匿名驗證
+  // 自動執行匿名驗證
   firebase.auth().signInAnonymously()
     .then((userCredential) => {
       console.log("Firebase 身份驗證成功！UID:", userCredential.user.uid);
       listenToCloudStorage();
     })
     .catch((error) => {
-      // 輸出詳細錯誤資訊至 Console 視窗以利排查
       console.error("Firebase 身份驗證詳細錯誤：", error.code, error.message);
-      
-      if (error.code === 'auth/operation-not-allowed') {
-        alert("資料庫連線失敗：請前往 Firebase 控制台開啟 Authentication 的「匿名 (Anonymous)」驗證功能。");
-      } else if (error.code === 'auth/unauthorized-domain') {
-        alert("資料庫連線失敗：請將 jie0603r.github.io 新增至 Firebase Authentication 的授權網域 (Authorized Domains) 中。");
-      } else {
-        alert(`資料庫連線失敗 [${error.code}]：${error.message}`);
-      }
+      alert(`資料庫連線失敗 [${error.code}]：${error.message}`);
     });
 });
 
@@ -99,7 +161,7 @@ window.switchCreateType = function(type) {
 // ==========================================
 // 6. 作品管理邏輯
 // ==========================================
-addProjectBtn.addEventListener('click', () => {
+function handleAddProject() {
   const name = prompt('請輸入新作品名稱：');
   if (name && name.trim() !== '') {
     const newProject = {
@@ -112,7 +174,7 @@ addProjectBtn.addEventListener('click', () => {
     currentProjectId = newProject.id;
     saveToStorage();
   }
-});
+}
 
 window.selectProject = function(id) {
   currentProjectId = id;
@@ -158,7 +220,7 @@ window.deleteProjectById = function(id, event) {
 // ==========================================
 // 7. 區塊建立邏輯
 // ==========================================
-addBtn.addEventListener('click', () => {
+function handleAddSection() {
   const name = sectionNameInput.value.trim();
   const total = parseInt(totalRowsInput.value);
 
@@ -200,12 +262,14 @@ addBtn.addEventListener('click', () => {
   totalRowsInput.value = '';
 
   saveToStorage();
-});
+}
 
 // ==========================================
 // 8. 核心畫面渲染 (Render)
 // ==========================================
 function render() {
+  if (!projectList || !counterList) return;
+
   projectList.innerHTML = '';
   projects.forEach(p => {
     const li = document.createElement('li');
@@ -261,7 +325,6 @@ function render() {
     card.style.cssText = lockedCardStyle;
 
     if (isCheckType) {
-      // 🔍 針數檢查卡片版面
       card.innerHTML = `
         <div class="card-header">
           <div class="card-title-group">
@@ -287,7 +350,6 @@ function render() {
         </div>
       `;
     } else {
-      // 🧶 一般編織計數卡片版面
       let reminderBarHTML = '';
       let modeSwitchBarHTML = '';
       let gridHTML = '';
@@ -396,7 +458,7 @@ function render() {
         </div>
 
         <div class="card-notes-area">
-          <textarea placeholder="📝 填寫區塊筆記 (例: 4.0mm 棒針、第 10 行右二併針...)" 
+          <textarea placeholder="📝 填寫區塊筆記 (例: 4.0mm 棒針...)" 
                     onchange="updateSectionNotes(${section.id}, this.value)">${section.notes || ''}</textarea>
         </div>
       `;
