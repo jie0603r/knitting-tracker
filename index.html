@@ -23,7 +23,7 @@
 </head>
 <body>
 
-  <!-- 手機版浮動頂部列與漢堡選單按鈕 -->
+  <!-- 手機版浮動頂部列 -->
   <div class="mobile-header">
     <button id="mobile-menu-btn" class="btn-mobile-menu">☰ 作品選單</button>
     <span class="mobile-app-title">🧶 編織記錄器</span>
@@ -37,7 +37,7 @@
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
         <h2>📂 作品清單</h2>
-        <button id="close-sidebar-btn" class="btn-close-sidebar">✕</button>
+        <button id="toggle-sidebar-btn" class="btn-toggle-sidebar" title="收起選單">◀</button>
       </div>
       <button id="add-project-btn" class="btn-primary">+ 新增作品</button>
       <ul id="project-list" class="project-list"></ul>
@@ -46,6 +46,7 @@
     <!-- 主內容區 -->
     <main class="main-content">
       <header class="header">
+        <button id="desktop-menu-btn" class="btn-desktop-menu" title="展開選單">📂 選單</button>
         <h1 id="current-project-title">載入中...</h1>
       </header>
 

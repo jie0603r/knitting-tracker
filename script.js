@@ -12,15 +12,15 @@ const dbRef = database.ref(`knitting_apps/${syncRoomId}`);
 // ==========================================
 let projects = [];
 let currentProjectId = null;
-let currentCreateType = 'knitting'; // 'knitting' 或 'check'
-let currentUnit = 'row'; // 'row' 或 'cm'
+let currentCreateType = 'knitting'; 
+let currentUnit = 'row'; 
 
 let projectList, addProjectBtn, currentProjectTitle;
 let sectionNameInput, totalRowsInput, totalInputLabel, unitToggleBtn, addBtn, counterList;
 let sidebar, sidebarOverlay;
 
 // ==========================================
-// 3. 核心資料儲存與邏輯函式
+// 3. 核心資料儲存與側邊欄切換邏輯
 // ==========================================
 function saveToStorage() {
   dbRef.set({
@@ -41,14 +41,21 @@ function calculateDefaultReminders(total, interval, startRow) {
   return reminders;
 }
 
-function closeSidebar() {
-  if (sidebar) sidebar.classList.remove('active');
-  if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+// 統一切換側邊欄開關（相容電腦與手機）
+function toggleSidebar() {
+  if (window.innerWidth <= 768) {
+    if (sidebar) sidebar.classList.toggle('active');
+    if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+  } else {
+    if (sidebar) sidebar.classList.toggle('collapsed');
+  }
 }
 
-function openSidebar() {
-  if (sidebar) sidebar.classList.add('active');
-  if (sidebarOverlay) sidebarOverlay.classList.add('active');
+function closeSidebar() {
+  if (window.innerWidth <= 768) {
+    if (sidebar) sidebar.classList.remove('active');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+  }
 }
 
 function listenToCloudStorage() {
@@ -95,7 +102,6 @@ function listenToCloudStorage() {
 // 4. 網頁初始化、PWA 註冊與 DOM 綁定
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  // 綁定 DOM 元素
   projectList = document.getElementById('project-list');
   addProjectBtn = document.getElementById('add-project-btn');
   currentProjectTitle = document.getElementById('current-project-title');
@@ -109,25 +115,24 @@ document.addEventListener('DOMContentLoaded', () => {
   sidebarOverlay = document.getElementById('sidebar-overlay');
 
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+  const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+  const desktopMenuBtn = document.getElementById('desktop-menu-btn');
 
-  // 綁定手機版側邊欄事件
-  if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
-  if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+  // 綁定側邊欄開關事件
+  if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+  if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', toggleSidebar);
+  if (desktopMenuBtn) desktopMenuBtn.addEventListener('click', toggleSidebar);
   if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
-  // 綁定按鈕事件
   if (addProjectBtn) addProjectBtn.addEventListener('click', handleAddProject);
   if (addBtn) addBtn.addEventListener('click', handleAddSection);
 
-  // 註冊 PWA Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
       .then((reg) => console.log('PWA Service Worker 註冊成功！範疇：', reg.scope))
       .catch((err) => console.error('PWA Service Worker 註冊失敗：', err));
   }
 
-  // 自動執行匿名驗證
   firebase.auth().signInAnonymously()
     .then((userCredential) => {
       console.log("Firebase 身份驗證成功！UID:", userCredential.user.uid);
@@ -197,7 +202,7 @@ function handleAddProject() {
 window.selectProject = function(id) {
   currentProjectId = id;
   saveToStorage();
-  closeSidebar(); // 切換作品後自動收合手機版側邊欄
+  closeSidebar();
 };
 
 window.editProjectById = function(id, event) {
@@ -237,7 +242,7 @@ window.deleteProjectById = function(id, event) {
 };
 
 // ==========================================
-// 7. 區塊建立邏輯
+// 7. 區塊建立與渲染邏輯
 // ==========================================
 function handleAddSection() {
   const name = sectionNameInput.value.trim();
@@ -283,9 +288,6 @@ function handleAddSection() {
   saveToStorage();
 }
 
-// ==========================================
-// 8. 畫面渲染 (Render)
-// ==========================================
 function render() {
   if (!projectList || !counterList) return;
 
@@ -488,7 +490,7 @@ function render() {
 }
 
 // ==========================================
-// 9. 區塊互動與更新邏輯
+// 8. 區塊互動與更新邏輯
 // ==========================================
 window.handleGridClick = function(sectionId, rowNumber) {
   const section = getActiveSection(sectionId);

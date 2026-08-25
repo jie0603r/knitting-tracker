@@ -15,7 +15,6 @@ body {
   min-height: 100vh;
 }
 
-/* 主容器：雙欄 Flex 佈局 */
 .app-container {
   width: 100%;
   max-width: 960px;
@@ -27,7 +26,7 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
-/* 👈 左側邊欄樣式 */
+/* 👈 側邊欄基礎樣式（電腦版） */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
@@ -35,6 +34,20 @@ body {
   padding-right: 20px;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* 電腦版收起狀態 */
+.sidebar.collapsed {
+  width: 0;
+  padding-right: 0;
+  margin-right: -24px;
+  opacity: 0;
+  border-right: none;
+  pointer-events: none;
 }
 
 .sidebar-header {
@@ -47,6 +60,21 @@ body {
 .sidebar-header h2 {
   font-size: 1.2rem;
   color: #2d3436;
+}
+
+.btn-toggle-sidebar {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #636e72;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.btn-toggle-sidebar:hover {
+  background-color: #dfe4ea;
 }
 
 .project-list {
@@ -90,18 +118,46 @@ body {
   gap: 2px;
 }
 
-/* 👉 右側主要內容區 */
+/* 👉 右側主要內容區 Header */
 .main-content {
   flex: 1;
   min-width: 0;
 }
 
-.header h1 {
-  font-size: 1.4rem;
-  color: #2d3436;
+.header {
+  display: flex;
+  align-items: center;
   margin-bottom: 16px;
   border-bottom: 2px solid #f1f2f6;
   padding-bottom: 8px;
+}
+
+.header h1 {
+  font-size: 1.4rem;
+  color: #2d3436;
+}
+
+.btn-desktop-menu {
+  display: none;
+  background-color: #e67e22;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: background 0.2s;
+}
+
+.btn-desktop-menu:hover {
+  background-color: #d35400;
+}
+
+/* 當側邊欄在電腦版收起時，顯示 Header 上的展開按鈕 */
+.sidebar.collapsed + .main-content .btn-desktop-menu {
+  display: inline-block;
 }
 
 /* 表單與模式切換區塊 */
@@ -166,7 +222,6 @@ body {
   border-color: #e67e22;
 }
 
-/* 單位切換輸入框定位容器 */
 .row-input-group {
   position: relative;
   display: flex;
@@ -196,7 +251,6 @@ body {
   background-color: #fdcb6e;
 }
 
-/* 按鈕通用樣式 */
 button {
   cursor: pointer;
   border: none;
@@ -231,7 +285,6 @@ button {
   opacity: 1;
 }
 
-/* 針數檢查展示區 */
 .stitch-check-box {
   text-align: center;
   background-color: #f8fafc;
@@ -253,7 +306,6 @@ button {
   margin-top: 4px;
 }
 
-/* 卡片與列表區塊 */
 .counter-list {
   display: flex;
   flex-direction: column;
@@ -294,7 +346,6 @@ button {
   color: #00b894;
 }
 
-/* 提醒與設定列 */
 .reminder-toggle-bar {
   margin-bottom: 12px;
 }
@@ -354,7 +405,6 @@ button {
   color: white;
 }
 
-/* 模式切換列 */
 .mode-switch-bar {
   display: flex;
   gap: 6px;
@@ -384,7 +434,6 @@ button {
   color: #d35400;
 }
 
-/* 格子區域 */
 .grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
@@ -452,7 +501,6 @@ button {
   margin-top: 1px;
 }
 
-/* 筆記區域 */
 .card-notes-area {
   margin-top: 12px;
 }
@@ -474,7 +522,6 @@ button {
   background-color: #ffffff;
 }
 
-/* 進度資訊區 */
 .progress-info {
   text-align: center;
   margin-bottom: 12px;
@@ -524,29 +571,21 @@ button {
 }
 
 /* ==========================================
-   📱 RWD 自適應與手機版側邊欄抽屜設定
+   📱 RWD 自適應與手機版抽屜設定
    ========================================== */
-
-/* 桌機版預設隱藏手機專用控制元素 */
 .mobile-header {
-  display: none;
-}
-.btn-close-sidebar {
   display: none;
 }
 .sidebar-overlay {
   display: none;
 }
 
-/* 螢幕寬度 768px 以下 (手機與小型平板) */
 @media (max-width: 768px) {
-  /* 1. 消除全域邊距，允許滿版固定頁首 */
   body {
     padding: 0;
     display: block;
   }
 
-  /* 2. 手機版頂部列置頂固定 */
   .mobile-header {
     display: flex;
     align-items: center;
@@ -561,7 +600,7 @@ button {
   }
 
   .btn-mobile-menu {
-    background-color: #4a90e2;
+    background-color: #e67e22;
     color: white;
     border: none;
     padding: 8px 14px;
@@ -577,7 +616,6 @@ button {
     color: #2d3748;
   }
 
-  /* 3. 調整主容器外觀 */
   .app-container {
     flex-direction: column;
     border-radius: 0;
@@ -586,7 +624,7 @@ button {
     gap: 0;
   }
 
-  /* 4. 側邊欄改為左側抽屜式 (Off-Canvas Slider) */
+  /* 手機版滑出抽屜 */
   .sidebar {
     position: fixed;
     top: 0;
@@ -595,34 +633,26 @@ button {
     height: 100vh;
     background-color: #ffffff;
     z-index: 1000;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
     padding: 20px;
     overflow-y: auto;
     border-right: none;
+    margin-right: 0 !important;
+    white-space: normal;
+  }
+
+  /* 覆蓋電腦版 collapsed 狀態，確保手機版邏輯獨立 */
+  .sidebar.collapsed {
+    width: 270px !important;
+    padding: 20px !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
   .sidebar.active {
     left: 0;
   }
 
-  .sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-
-  .btn-close-sidebar {
-    display: inline-block;
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    color: #718096;
-    cursor: pointer;
-  }
-
-  /* 5. 半透明背景遮罩 */
   .sidebar-overlay {
     display: block;
     position: fixed;
@@ -645,5 +675,9 @@ button {
 
   .main-content {
     padding: 0;
+  }
+
+  .btn-desktop-menu {
+    display: none !important;
   }
 }
