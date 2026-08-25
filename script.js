@@ -30,10 +30,19 @@ let currentCreateType = 'knitting'; // 'knitting' 或 'check'
 let currentUnit = 'row'; // 'row' (行) 或 'cm' (公分)
 
 // ==========================================
-// 4. 網頁初始化與 Firebase 即時同步
+// 4. 網頁初始化與 Firebase 身份驗證 & 即時同步
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  listenToCloudStorage();
+  // 自動執行匿名驗證，獲得通行權限後才開啟即時資料連線
+  firebase.auth().signInAnonymously()
+    .then(() => {
+      console.log("Firebase 身份驗證成功！");
+      listenToCloudStorage();
+    })
+    .catch((error) => {
+      console.error("Firebase 身份驗證失敗：", error);
+      alert("資料庫連線失敗，請確認 Authentication 已開啟匿名驗證功能。");
+    });
 });
 
 function listenToCloudStorage() {
@@ -327,7 +336,6 @@ function render() {
       let modeSwitchBarHTML = '';
       let gridHTML = '';
 
-      // 只有在非 cm 模式（行數模式）下才顯示提醒設定與格子方框
       if (!isCmUnit) {
         if (!section.hasReminder) {
           reminderBarHTML = `
