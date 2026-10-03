@@ -5,14 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>編織記錄器 Knitting Tracker</title>
   
-  <!-- PWA 相關設定 -->
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#e67e22">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="編織記錄器">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3050/3050158.png">
-
   <link rel="stylesheet" href="style.css">
   
   <!-- Firebase SDK -->
@@ -23,21 +15,12 @@
 </head>
 <body>
 
-  <!-- 手機版浮動頂部列 -->
-  <div class="mobile-header">
-    <button id="mobile-menu-btn" class="btn-mobile-menu">☰ 作品選單</button>
-    <span class="mobile-app-title">🧶 編織記錄器</span>
-  </div>
-
-  <!-- 手機版側邊欄背景遮罩 -->
-  <div id="sidebar-overlay" class="sidebar-overlay"></div>
-
   <div class="app-container">
-    <!-- 側邊欄 -->
+    <!-- 側邊欄 (預設展開，切換 collapsed 後完全隱藏) -->
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
         <h2>📂 作品清單</h2>
-        <button id="toggle-sidebar-btn" class="btn-toggle-sidebar" title="收起選單">◀</button>
+        <button id="toggle-sidebar-btn" class="btn-toggle-sidebar" title="收起選單">◀ 收起</button>
       </div>
       <button id="add-project-btn" class="btn-primary">+ 新增作品</button>
       <ul id="project-list" class="project-list"></ul>
@@ -46,7 +29,7 @@
     <!-- 主內容區 -->
     <main class="main-content">
       <header class="header">
-        <button id="desktop-menu-btn" class="btn-desktop-menu" title="展開選單">📂 選單</button>
+        <button id="menu-btn" class="btn-menu" title="展開/收起選單">📂 作品選單</button>
         <h1 id="current-project-title">載入中...</h1>
       </header>
 

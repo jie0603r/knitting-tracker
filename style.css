@@ -26,7 +26,7 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
-/* 👈 電腦版側邊欄基礎樣式 */
+/* 👈 側邊欄樣式 */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
@@ -34,20 +34,12 @@ body {
   padding-right: 20px;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 1;
-  overflow: hidden;
-  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
-/* 電腦版收起狀態 */
+/* 當側邊欄加上 collapsed 時，完全消失 */
 .sidebar.collapsed {
-  width: 0;
-  padding-right: 0;
-  margin-right: -24px;
-  opacity: 0;
-  border-right: none;
-  pointer-events: none;
+  display: none !important;
 }
 
 .sidebar-header {
@@ -63,9 +55,9 @@ body {
 }
 
 .btn-toggle-sidebar {
-  background: transparent;
+  background: #f1f2f6;
   border: none;
-  font-size: 1rem;
+  font-size: 0.85rem;
   cursor: pointer;
   color: #636e72;
   padding: 4px 8px;
@@ -118,10 +110,11 @@ body {
   gap: 2px;
 }
 
-/* 👉 右側主要內容區 Header */
+/* 👉 右側主要內容區 */
 .main-content {
   flex: 1;
   min-width: 0;
+  width: 100%;
 }
 
 .header {
@@ -137,8 +130,7 @@ body {
   color: #2d3436;
 }
 
-.btn-desktop-menu {
-  display: none;
+.btn-menu {
   background-color: #e67e22;
   color: white;
   border: none;
@@ -149,15 +141,11 @@ body {
   cursor: pointer;
   margin-right: 12px;
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
-.btn-desktop-menu:hover {
+.btn-menu:hover {
   background-color: #d35400;
-}
-
-/* 當側邊欄在電腦版收起時，顯示 Header 上的展開按鈕 */
-.sidebar.collapsed + .main-content .btn-desktop-menu {
-  display: inline-block;
 }
 
 /* 表單與模式切換區塊 */
@@ -571,120 +559,24 @@ button {
 }
 
 /* ==========================================
-   📱 手機版專屬修正排版 (RWD)
+   📱 RWD 排版調整
    ========================================== */
-.mobile-header {
-  display: none;
-}
-.sidebar-overlay {
-  display: none;
-}
-
 @media (max-width: 768px) {
   body {
-    padding: 0;
-    display: block;
-    overflow-x: hidden;
+    padding: 10px;
   }
 
-  .mobile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #ffffff;
-    padding: 12px 16px;
-    border-bottom: 1px solid #e2e8f0;
-    position: sticky;
-    top: 0;
-    z-index: 90;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-
-  .btn-mobile-menu {
-    background-color: #e67e22;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  .mobile-app-title {
-    font-weight: bold;
-    font-size: 1.1rem;
-    color: #2d3748;
-  }
-
-  /* 強制主容器改為直向顯示 */
   .app-container {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    border-radius: 0;
-    box-shadow: none;
+    flex-direction: column;
     padding: 16px;
-    margin: 0;
+    gap: 16px;
   }
 
-  /* 徹底固定側邊欄為抽屜層，不佔用畫面寬度 */
   .sidebar {
-    position: fixed !important;
-    top: 0 !important;
-    left: -290px !important;
-    width: 270px !important;
-    height: 100vh !important;
-    background-color: #ffffff !important;
-    z-index: 1000 !important;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15) !important;
-    padding: 20px !important;
-    overflow-y: auto !important;
-    border-right: none !important;
-    margin: 0 !important;
-    white-space: normal !important;
-    transition: left 0.3s ease !important;
-  }
-
-  /* 覆蓋電腦版 collapsed 狀態，避免衝突 */
-  .sidebar.collapsed {
-    width: 270px !important;
-    margin: 0 !important;
-    padding: 20px !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
-
-  .sidebar.active {
-    left: 0 !important;
-  }
-
-  .sidebar-overlay {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
-    z-index: 999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .sidebar-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .main-content {
-    width: 100% !important;
-    padding: 0 !important;
-  }
-
-  .btn-desktop-menu {
-    display: none !important;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #f1f2f6;
+    padding-right: 0;
+    padding-bottom: 16px;
   }
 }

@@ -17,7 +17,7 @@ let currentUnit = 'row';
 
 let projectList, addProjectBtn, currentProjectTitle;
 let sectionNameInput, totalRowsInput, totalInputLabel, unitToggleBtn, addBtn, counterList;
-let sidebar, sidebarOverlay;
+let sidebar;
 
 // ==========================================
 // 3. 核心資料儲存與側邊欄切換邏輯
@@ -41,20 +41,10 @@ function calculateDefaultReminders(total, interval, startRow) {
   return reminders;
 }
 
-// 統一切換側邊欄開關（相容電腦與手機）
+// 統一切換側邊欄開關（點擊即切換 collapsed 類別）
 function toggleSidebar() {
-  if (window.innerWidth <= 768) {
-    if (sidebar) sidebar.classList.toggle('active');
-    if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
-  } else {
-    if (sidebar) sidebar.classList.toggle('collapsed');
-  }
-}
-
-function closeSidebar() {
-  if (window.innerWidth <= 768) {
-    if (sidebar) sidebar.classList.remove('active');
-    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+  if (sidebar) {
+    sidebar.classList.toggle('collapsed');
   }
 }
 
@@ -99,7 +89,7 @@ function listenToCloudStorage() {
 }
 
 // ==========================================
-// 4. 網頁初始化、PWA 註冊與 DOM 綁定
+// 4. 網頁初始化與 DOM 綁定
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   projectList = document.getElementById('project-list');
@@ -112,26 +102,16 @@ document.addEventListener('DOMContentLoaded', () => {
   addBtn = document.getElementById('add-btn');
   counterList = document.getElementById('counter-list');
   sidebar = document.getElementById('sidebar');
-  sidebarOverlay = document.getElementById('sidebar-overlay');
 
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const menuBtn = document.getElementById('menu-btn');
   const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
-  const desktopMenuBtn = document.getElementById('desktop-menu-btn');
 
   // 綁定側邊欄開關事件
-  if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+  if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
   if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', toggleSidebar);
-  if (desktopMenuBtn) desktopMenuBtn.addEventListener('click', toggleSidebar);
-  if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
   if (addProjectBtn) addProjectBtn.addEventListener('click', handleAddProject);
   if (addBtn) addBtn.addEventListener('click', handleAddSection);
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then((reg) => console.log('PWA Service Worker 註冊成功！範疇：', reg.scope))
-      .catch((err) => console.error('PWA Service Worker 註冊失敗：', err));
-  }
 
   firebase.auth().signInAnonymously()
     .then((userCredential) => {
@@ -195,14 +175,12 @@ function handleAddProject() {
     projects.push(newProject);
     currentProjectId = newProject.id;
     saveToStorage();
-    closeSidebar();
   }
 }
 
 window.selectProject = function(id) {
   currentProjectId = id;
   saveToStorage();
-  closeSidebar();
 };
 
 window.editProjectById = function(id, event) {
@@ -301,7 +279,7 @@ function render() {
     li.innerHTML = `
       <span class="project-name">🧵 ${p.name}</span>
       <div class="project-item-tools">
-        <button class="btn-tool" onclick="editProjectById(${p.id}, event)" title="修改名稱">✏️</button>
+        <button class="btn-tool" onclick="editProjectById(${p.id}, event)" title="修改名稱">✏️️</button>
         <button class="btn-tool" onclick="deleteProjectById(${p.id}, event)" title="刪除作品">🗑️</button>
       </div>
     `;
