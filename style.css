@@ -260,6 +260,26 @@ button {
   background-color: #d35400;
 }
 
+/* 次要按鈕樣式（匯入按鈕使用） */
+.btn-secondary {
+  width: 100%;
+  padding: 10px;
+  background-color: #f1f2f6;
+  color: #2d3436;
+  border: 1px solid #dfe4ea;
+  font-size: 0.92rem;
+  margin-top: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #dfe4ea;
+  color: #000000;
+}
+
 .btn-tool {
   background: transparent;
   padding: 4px 6px;

@@ -18,6 +18,7 @@ let currentUnit = 'row';
 let projectList, addProjectBtn, currentProjectTitle;
 let sectionNameInput, totalRowsInput, totalInputLabel, unitToggleBtn, addBtn, counterList;
 let sidebar;
+let importJsonBtn, jsonFileInput;
 
 // ==========================================
 // 3. 核心資料儲存與側邊欄切換邏輯
@@ -103,6 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
   counterList = document.getElementById('counter-list');
   sidebar = document.getElementById('sidebar');
 
+  // 匯入 JSON 按鈕與 Input DOM
+  importJsonBtn = document.getElementById('import-json-btn');
+  jsonFileInput = document.getElementById('json-file-input');
+
   const menuBtn = document.getElementById('menu-btn');
   const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
 
@@ -112,6 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (addProjectBtn) addProjectBtn.addEventListener('click', handleAddProject);
   if (addBtn) addBtn.addEventListener('click', handleAddSection);
+
+  // 綁定 JSON 匯入事件
+  if (importJsonBtn && jsonFileInput) {
+    importJsonBtn.addEventListener('click', () => jsonFileInput.click());
+    jsonFileInput.addEventListener('change', handleJsonImport);
+  }
 
   firebase.auth().signInAnonymously()
     .then((userCredential) => {
@@ -125,7 +136,84 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 5. 單位切換與類型切換
+// 5. JSON 檔案匯入處理邏輯
+// ==========================================
+function handleJsonImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedData = JSON.parse(e.target.result);
+      processImportedProjects(importedData);
+      // 清空 input 讓同一個檔案可以重複點擊上傳
+      event.target.value = '';
+    } catch (err) {
+      alert('JSON 檔案解析失敗！請確認檔案格式是否正確。');
+      console.error('JSON Parse Error:', err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function processImportedProjects(data) {
+  let newProjectsList = [];
+
+  // 自動分辨：是包含 projects 的物件，還是單一作品物件
+  if (data.projects && Array.isArray(data.projects)) {
+    newProjectsList = data.projects;
+  } else if (data.name && Array.isArray(data.sections)) {
+    newProjectsList = [data];
+  } else {
+    alert('匯入失敗：JSON 結構不符合格式需求（缺少 name 或 sections）。');
+    return;
+  }
+
+  let lastAddedProjectId = null;
+  const now = Date.now();
+
+  // 處理並重新產生 ID 避免與原有資料衝突
+  newProjectsList.forEach((proj, pIdx) => {
+    const newProjectId = now + pIdx;
+    const processedSections = (proj.sections || []).map((sec, sIdx) => {
+      return {
+        id: now + (pIdx + 1) * 1000 + sIdx,
+        type: sec.type || 'knitting',
+        unit: sec.unit || 'row',
+        name: sec.name || '未命名區塊',
+        current: sec.current || 0,
+        total: sec.total || 1,
+        hasReminder: sec.hasReminder !== undefined ? sec.hasReminder : false,
+        actionType: sec.actionType || 'increase',
+        interval: sec.interval || 4,
+        startRow: sec.startRow || 1,
+        customReminders: Array.isArray(sec.customReminders) ? sec.customReminders : [],
+        mode: sec.mode || 'progress',
+        notes: sec.notes || '',
+        isLocked: sec.isLocked !== undefined ? sec.isLocked : false
+      };
+    });
+
+    const newProject = {
+      id: newProjectId,
+      name: proj.name || '匯入的作品',
+      sections: processedSections
+    };
+
+    projects.push(newProject);
+    lastAddedProjectId = newProjectId;
+  });
+
+  if (lastAddedProjectId) {
+    currentProjectId = lastAddedProjectId;
+    saveToStorage();
+    alert(`成功匯入 ${newProjectsList.length} 個作品！`);
+  }
+}
+
+// ==========================================
+// 6. 單位切換與類型切換
 // ==========================================
 window.toggleUnit = function() {
   currentUnit = (currentUnit === 'row') ? 'cm' : 'row';
@@ -161,7 +249,7 @@ window.switchCreateType = function(type) {
 };
 
 // ==========================================
-// 6. 作品管理邏輯
+// 7. 作品管理邏輯
 // ==========================================
 function handleAddProject() {
   const name = prompt('請輸入新作品名稱：');
@@ -220,7 +308,7 @@ window.deleteProjectById = function(id, event) {
 };
 
 // ==========================================
-// 7. 區塊建立與渲染邏輯
+// 8. 區塊建立與渲染邏輯
 // ==========================================
 function handleAddSection() {
   const name = sectionNameInput.value.trim();
@@ -279,7 +367,7 @@ function render() {
     li.innerHTML = `
       <span class="project-name">🧵 ${p.name}</span>
       <div class="project-item-tools">
-        <button class="btn-tool" onclick="editProjectById(${p.id}, event)" title="修改名稱">✏️️</button>
+        <button class="btn-tool" onclick="editProjectById(${p.id}, event)" title="修改名稱">✏</button>
         <button class="btn-tool" onclick="deleteProjectById(${p.id}, event)" title="刪除作品">🗑️</button>
       </div>
     `;
@@ -297,7 +385,7 @@ function render() {
   if (currentProject.sections.length === 0) {
     counterList.innerHTML = `
       <p style="text-align: center; color: #636e72; padding: 20px 0;">
-        此作品目前沒有任何區塊，請在上方建立！
+        此作品目前沒有任何區塊，請在上方建立或匯入織圖！
       </p>`;
     return;
   }
@@ -468,7 +556,7 @@ function render() {
 }
 
 // ==========================================
-// 8. 區塊互動與更新邏輯
+// 9. 區塊互動與更新邏輯
 // ==========================================
 window.handleGridClick = function(sectionId, rowNumber) {
   const section = getActiveSection(sectionId);
