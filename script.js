@@ -14,6 +14,7 @@ let projects = [];
 let currentProjectId = null;
 let currentCreateType = 'knitting'; 
 let currentUnit = 'row'; 
+let draggedIndex = null; // 記錄目前被拖曳的區塊索引
 
 let projectList, addProjectBtn, currentProjectTitle;
 let sectionNameInput, totalRowsInput, totalInputLabel, unitToggleBtn, addBtn, counterList;
@@ -42,7 +43,6 @@ function calculateDefaultReminders(total, interval, startRow) {
   return reminders;
 }
 
-// 統一切換側邊欄開關（點擊即切換 collapsed 類別）
 function toggleSidebar() {
   if (sidebar) {
     sidebar.classList.toggle('collapsed');
@@ -104,21 +104,18 @@ document.addEventListener('DOMContentLoaded', () => {
   counterList = document.getElementById('counter-list');
   sidebar = document.getElementById('sidebar');
 
-  // 匯入 JSON 按鈕與 Input DOM
   importJsonBtn = document.getElementById('import-json-btn');
   jsonFileInput = document.getElementById('json-file-input');
 
   const menuBtn = document.getElementById('menu-btn');
   const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
 
-  // 綁定側邊欄開關事件
   if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
   if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', toggleSidebar);
 
   if (addProjectBtn) addProjectBtn.addEventListener('click', handleAddProject);
   if (addBtn) addBtn.addEventListener('click', handleAddSection);
 
-  // 綁定 JSON 匯入事件
   if (importJsonBtn && jsonFileInput) {
     importJsonBtn.addEventListener('click', () => jsonFileInput.click());
     jsonFileInput.addEventListener('change', handleJsonImport);
@@ -147,7 +144,6 @@ function handleJsonImport(event) {
     try {
       const importedData = JSON.parse(e.target.result);
       processImportedProjects(importedData);
-      // 清空 input 讓同一個檔案可以重複點擊上傳
       event.target.value = '';
     } catch (err) {
       alert('JSON 檔案解析失敗！請確認檔案格式是否正確。');
@@ -160,20 +156,18 @@ function handleJsonImport(event) {
 function processImportedProjects(data) {
   let newProjectsList = [];
 
-  // 自動分辨：是包含 projects 的物件，還是單一作品物件
   if (data.projects && Array.isArray(data.projects)) {
     newProjectsList = data.projects;
   } else if (data.name && Array.isArray(data.sections)) {
     newProjectsList = [data];
   } else {
-    alert('匯入失敗：JSON 結構不符合格式需求（缺少 name 或 sections）。');
+    alert('匯入失敗：JSON 結構不符合格式需求。');
     return;
   }
 
   let lastAddedProjectId = null;
   const now = Date.now();
 
-  // 處理並重新產生 ID 避免與原有資料衝突
   newProjectsList.forEach((proj, pIdx) => {
     const newProjectId = now + pIdx;
     const processedSections = (proj.sections || []).map((sec, sIdx) => {
@@ -213,7 +207,7 @@ function processImportedProjects(data) {
 }
 
 // ==========================================
-// 6. 單位切換與類型切換
+// 6. 單位與類型切換
 // ==========================================
 window.toggleUnit = function() {
   currentUnit = (currentUnit === 'row') ? 'cm' : 'row';
@@ -308,7 +302,21 @@ window.deleteProjectById = function(id, event) {
 };
 
 // ==========================================
-// 8. 區塊建立與渲染邏輯
+// 8. 拖曳排序核心邏輯
+// ==========================================
+function reorderSections(fromIndex, toIndex) {
+  const currentProject = projects.find(p => p.id === currentProjectId);
+  if (!currentProject || !currentProject.sections) return;
+
+  // 移動陣列位置
+  const [movedSection] = currentProject.sections.splice(fromIndex, 1);
+  currentProject.sections.splice(toIndex, 0, movedSection);
+
+  saveToStorage();
+}
+
+// ==========================================
+// 9. 區塊建立與渲染邏輯
 // ==========================================
 function handleAddSection() {
   const name = sectionNameInput.value.trim();
@@ -390,7 +398,7 @@ function render() {
     return;
   }
 
-  currentProject.sections.forEach(section => {
+  currentProject.sections.forEach((section, index) => {
     const isCheckType = section.type === 'check';
     const isCmUnit = section.unit === 'cm';
     const isCompleted = section.current >= section.total;
@@ -410,11 +418,45 @@ function render() {
     const card = document.createElement('div');
     card.className = 'counter-card';
     card.style.cssText = lockedCardStyle;
+    card.setAttribute('draggable', 'true');
+    card.dataset.index = index;
+
+    // 拖曳事件綁定
+    card.addEventListener('dragstart', (e) => {
+      draggedIndex = index;
+      e.dataTransfer.effectAllowed = 'move';
+      card.classList.add('dragging');
+    });
+
+    card.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      card.classList.add('drag-over');
+    });
+
+    card.addEventListener('dragleave', () => {
+      card.classList.remove('drag-over');
+    });
+
+    card.addEventListener('drop', (e) => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      if (draggedIndex !== null && draggedIndex !== index) {
+        reorderSections(draggedIndex, index);
+      }
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      document.querySelectorAll('.counter-card').forEach(c => c.classList.remove('drag-over'));
+      draggedIndex = null;
+    });
 
     if (isCheckType) {
       card.innerHTML = `
         <div class="card-header">
           <div class="card-title-group">
+            <span class="drag-handle" title="按住拖曳排序">⠿</span>
             <h3>🔍 ${section.name}</h3>
             <span class="${statusClass}">${statusText}</span>
           </div>
@@ -518,6 +560,7 @@ function render() {
       card.innerHTML = `
         <div class="card-header">
           <div class="card-title-group">
+            <span class="drag-handle" title="按住拖曳排序">⠿</span>
             <h3>${section.name}</h3>
             <span class="${statusClass}">${statusText}</span>
           </div>
@@ -556,7 +599,7 @@ function render() {
 }
 
 // ==========================================
-// 9. 區塊互動與更新邏輯
+// 10. 區塊互動與更新邏輯
 // ==========================================
 window.handleGridClick = function(sectionId, rowNumber) {
   const section = getActiveSection(sectionId);

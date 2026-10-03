@@ -600,3 +600,36 @@ button {
     padding-bottom: 16px;
   }
 }
+
+/* ==========================================
+   ✋ 拖曳排序相關樣式
+   ========================================== */
+.drag-handle {
+  cursor: grab;
+  font-size: 1.1rem;
+  color: #b2bec3;
+  margin-right: 8px;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.drag-handle:hover {
+  color: #e67e22;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* 拖曳中的卡片樣式 */
+.counter-card.dragging {
+  opacity: 0.4;
+  border: 2px dashed #e67e22 !important;
+  background-color: #fff8ed !important;
+}
+
+/* 拖曳經過目標卡片時的上方指示線 */
+.counter-card.drag-over {
+  border-top: 3px solid #e67e22 !important;
+  transform: translateY(2px);
+}
