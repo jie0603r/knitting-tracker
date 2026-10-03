@@ -1,3 +1,8 @@
+/* ==========================================
+   🧶 毛線編織計數器 - 北歐極簡配色版 (style.css)
+   （完整保留原版結構，僅替換色彩系統）
+   ========================================== */
+
 /* 全域變數與基礎設定 */
 * {
   box-sizing: border-box;
@@ -7,8 +12,8 @@
 }
 
 body {
-  background-color: #f8f9fa;
-  color: #2d3436;
+  background-color: #faf9f6; /* 亞麻米白主背景 */
+  color: #3c3835;            /* 暗泥棕文字 */
   display: flex;
   justify-content: center;
   padding: 20px;
@@ -23,14 +28,14 @@ body {
   background: #ffffff;
   padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(60, 56, 53, 0.05);
 }
 
 /* 👈 側邊欄樣式 */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  border-right: 1px solid #f1f2f6;
+  border-right: 1px solid #e8e4de;
   padding-right: 20px;
   display: flex;
   flex-direction: column;
@@ -51,22 +56,22 @@ body {
 
 .sidebar-header h2 {
   font-size: 1.2rem;
-  color: #2d3436;
+  color: #3c3835;
 }
 
 .btn-toggle-sidebar {
-  background: #f1f2f6;
+  background: #f4f1ea;
   border: none;
   font-size: 0.85rem;
   cursor: pointer;
-  color: #636e72;
+  color: #8c857b;
   padding: 4px 8px;
   border-radius: 6px;
   transition: background 0.2s;
 }
 
 .btn-toggle-sidebar:hover {
-  background-color: #dfe4ea;
+  background-color: #eae5dc;
 }
 
 .project-list {
@@ -84,17 +89,17 @@ body {
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #2d3436;
+  color: #3c3835;
   transition: all 0.2s ease;
 }
 
 .project-item:hover {
-  background-color: #f1f2f6;
+  background-color: #f4f1ea;
 }
 
 .project-item.active {
-  background-color: #ffeaa7;
-  color: #d35400;
+  background-color: #f0ece3;
+  color: #5c5238;
   font-weight: bold;
 }
 
@@ -121,17 +126,17 @@ body {
   display: flex;
   align-items: center;
   margin-bottom: 16px;
-  border-bottom: 2px solid #f1f2f6;
+  border-bottom: 2px solid #e8e4de;
   padding-bottom: 8px;
 }
 
 .header h1 {
   font-size: 1.4rem;
-  color: #2d3436;
+  color: #3c3835;
 }
 
 .btn-menu {
-  background-color: #e67e22;
+  background-color: #5c5238; /* 北歐橄欖棕 */
   color: white;
   border: none;
   padding: 6px 12px;
@@ -145,13 +150,13 @@ body {
 }
 
 .btn-menu:hover {
-  background-color: #d35400;
+  background-color: #4a422d;
 }
 
 /* 表單與模式切換區塊 */
 .input-card {
   background: #ffffff;
-  border: 1px solid #eccc68;
+  border: 1px solid #e8e4de;
   padding: 16px;
   border-radius: 12px;
   margin-bottom: 24px;
@@ -166,9 +171,9 @@ body {
 .type-btn {
   flex: 1;
   padding: 8px 12px;
-  background-color: #f1f2f6;
-  color: #636e72;
-  border: 1px solid #dfe4ea;
+  background-color: #f4f1ea;
+  color: #8c857b;
+  border: 1px solid #e8e4de;
   border-radius: 8px;
   font-weight: bold;
   font-size: 0.88rem;
@@ -177,9 +182,9 @@ body {
 }
 
 .type-btn.active {
-  background-color: #e67e22;
+  background-color: #5c5238;
   color: #ffffff;
-  border-color: #d35400;
+  border-color: #4a422d;
 }
 
 .input-group {
@@ -190,7 +195,7 @@ body {
   display: block;
   font-size: 0.85rem;
   margin-bottom: 6px;
-  color: #57606f;
+  color: #8c857b;
   font-weight: bold;
 }
 
@@ -199,7 +204,7 @@ body {
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #dfe4ea;
+  border: 1px solid #e8e4de;
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s ease;
@@ -207,7 +212,7 @@ body {
 
 .input-group input[type="text"]:focus,
 .input-group input[type="number"]:focus {
-  border-color: #e67e22;
+  border-color: #5c5238;
 }
 
 .row-input-group {
@@ -225,9 +230,9 @@ body {
   right: 6px;
   bottom: 6px;
   padding: 4px 12px;
-  background-color: #ffeaa7;
-  color: #d35400;
-  border: 1px solid #eccc68;
+  background-color: #f0ece3;
+  color: #5c5238;
+  border: 1px solid #e8e4de;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: bold;
@@ -236,7 +241,7 @@ body {
 }
 
 .btn-unit-toggle:hover {
-  background-color: #fdcb6e;
+  background-color: #eae5dc;
 }
 
 button {
@@ -250,23 +255,23 @@ button {
 .btn-primary {
   width: 100%;
   padding: 10px;
-  background-color: #e67e22;
+  background-color: #5c5238;
   color: white;
   font-size: 1rem;
   margin-top: 4px;
 }
 
 .btn-primary:hover {
-  background-color: #d35400;
+  background-color: #4a422d;
 }
 
 /* 次要按鈕樣式（匯入按鈕使用） */
 .btn-secondary {
   width: 100%;
   padding: 10px;
-  background-color: #f1f2f6;
-  color: #2d3436;
-  border: 1px solid #dfe4ea;
+  background-color: #f4f1ea;
+  color: #3c3835;
+  border: 1px solid #e8e4de;
   font-size: 0.92rem;
   margin-top: 8px;
   border-radius: 8px;
@@ -276,8 +281,8 @@ button {
 }
 
 .btn-secondary:hover {
-  background-color: #dfe4ea;
-  color: #000000;
+  background-color: #eae5dc;
+  color: #3c3835;
 }
 
 .btn-tool {
@@ -289,14 +294,14 @@ button {
 }
 
 .btn-tool:hover {
-  background-color: #dfe4ea;
+  background-color: #eae5dc;
   opacity: 1;
 }
 
 .stitch-check-box {
   text-align: center;
-  background-color: #f8fafc;
-  border: 2px dashed #00b894;
+  background-color: #faf9f6;
+  border: 2px dashed #5c5238;
   border-radius: 12px;
   padding: 18px 12px;
   margin: 12px 0;
@@ -305,12 +310,12 @@ button {
 .stitch-check-number {
   font-size: 2.2rem;
   font-weight: 800;
-  color: #00b894;
+  color: #5c5238;
 }
 
 .stitch-check-label {
   font-size: 0.85rem;
-  color: #636e72;
+  color: #8c857b;
   margin-top: 4px;
 }
 
@@ -321,11 +326,11 @@ button {
 }
 
 .counter-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e8e4de;
   border-radius: 12px;
   padding: 16px;
   background-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(60, 56, 53, 0.04);
 }
 
 .card-header {
@@ -345,13 +350,13 @@ button {
   font-size: 0.75rem;
   padding: 2px 8px;
   border-radius: 12px;
-  background-color: #ffeaa7;
-  color: #d35400;
+  background-color: #f0ece3;
+  color: #5c5238;
 }
 
 .status-badge.completed {
-  background-color: #55efc4;
-  color: #00b894;
+  background-color: #e2ece9;
+  color: #3c5245;
 }
 
 .reminder-toggle-bar {
@@ -359,17 +364,17 @@ button {
 }
 
 .btn-add-reminder {
-  background-color: #f1f2f6;
-  color: #57606f;
+  background-color: #f4f1ea;
+  color: #8c857b;
   font-size: 0.8rem;
   padding: 6px 12px;
   border-radius: 20px;
-  border: 1px dashed #b2bec3;
+  border: 1px dashed #e8e4de;
 }
 
 .btn-add-reminder:hover {
-  background-color: #dfe4ea;
-  color: #2d3436;
+  background-color: #eae5dc;
+  color: #3c3835;
 }
 
 .card-setting-bar {
@@ -377,19 +382,19 @@ button {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  background: #fff8ed;
+  background: #fbf9f4;
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 0.82rem;
-  color: #d35400;
+  color: #5c5238;
   margin-bottom: 8px;
-  border: 1px dashed #f39c12;
+  border: 1px dashed #dcd6cd;
 }
 
 .card-setting-bar select, 
 .card-setting-bar input {
   padding: 2px 6px;
-  border: 1px solid #f39c12;
+  border: 1px solid #e8e4de;
   border-radius: 4px;
   font-size: 0.82rem;
   background: #ffffff;
@@ -403,21 +408,21 @@ button {
 .btn-remove-reminder {
   margin-left: auto;
   background: transparent;
-  color: #e74c3c;
+  color: #a94442;
   font-size: 0.8rem;
   padding: 2px 6px;
 }
 
 .btn-remove-reminder:hover {
-  background: #ff7675;
-  color: white;
+  background: #f2dede;
+  color: #a94442;
 }
 
 .mode-switch-bar {
   display: flex;
   gap: 6px;
   margin-bottom: 12px;
-  background-color: #f1f2f6;
+  background-color: #f4f1ea;
   padding: 4px;
   border-radius: 8px;
 }
@@ -427,19 +432,19 @@ button {
   padding: 6px;
   font-size: 0.8rem;
   background: transparent;
-  color: #636e72;
+  color: #8c857b;
   border-radius: 6px;
 }
 
 .btn-mode.active {
   background: #ffffff;
-  color: #2d3436;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  color: #3c3835;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
 }
 
 .btn-mode.active.edit-mode {
-  background: #ffeaa7;
-  color: #d35400;
+  background: #f0ece3;
+  color: #5c5238;
 }
 
 .grid-container {
@@ -451,9 +456,9 @@ button {
 
 .grid-square {
   aspect-ratio: 1;
-  border: 2px solid #cbd5e1;
+  border: 2px solid #e8e4de;
   border-radius: 6px;
-  background-color: #f8fafc;
+  background-color: #faf9f6;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -461,45 +466,45 @@ button {
   justify-content: center;
   font-size: 0.75rem;
   font-weight: bold;
-  color: #94a3b8;
+  color: #b0a89e;
   position: relative;
   transition: all 0.15s ease;
 }
 
 .grid-square:hover {
-  border-color: #94a3b8;
+  border-color: #5c5238;
 }
 
 .edit-mode-active .grid-square:hover {
-  border-color: #e67e22 !important;
+  border-color: #5c5238 !important;
   transform: scale(1.05);
 }
 
 .grid-square.filled {
-  background-color: #74b9ff;
-  border-color: #0984e3;
-  color: #ffffff;
+  background-color: #dcd6cd;
+  border-color: #b8b0a2;
+  color: #3c3835;
 }
 
 .grid-square.reminder-increase {
-  border: 2px solid #e67e22 !important;
-  box-shadow: 0 0 4px rgba(230, 126, 34, 0.4);
+  border: 2px solid #5c5238 !important;
+  box-shadow: 0 0 4px rgba(92, 82, 56, 0.3);
 }
 
 .grid-square.reminder-increase.filled {
-  background-color: #e67e22 !important;
-  border-color: #d35400 !important;
+  background-color: #5c5238 !important;
+  border-color: #4a422d !important;
   color: #ffffff;
 }
 
 .grid-square.reminder-decrease {
-  border: 2px solid #9b59b6 !important;
-  box-shadow: 0 0 4px rgba(155, 89, 182, 0.4);
+  border: 2px solid #8e7a6b !important;
+  box-shadow: 0 0 4px rgba(142, 122, 107, 0.3);
 }
 
 .grid-square.reminder-decrease.filled {
-  background-color: #9b59b6 !important;
-  border-color: #8e44ad !important;
+  background-color: #8e7a6b !important;
+  border-color: #6e5c4f !important;
   color: #ffffff;
 }
 
@@ -518,15 +523,15 @@ button {
   height: 52px;
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #dfe4ea;
+  border: 1px solid #e8e4de;
   font-size: 0.85rem;
   resize: vertical;
-  background-color: #fafafa;
+  background-color: #faf9f6;
 }
 
 .card-notes-area textarea:focus {
   outline: none;
-  border-color: #e67e22;
+  border-color: #5c5238;
   background-color: #ffffff;
 }
 
@@ -534,26 +539,26 @@ button {
   text-align: center;
   margin-bottom: 12px;
   font-size: 1.1rem;
-  color: #636e72;
+  color: #8c857b;
   font-weight: 600;
 }
 
 .progress-info .current-row {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #e67e22;
+  color: #5c5238;
   margin-right: 2px;
   transition: color 0.2s ease;
 }
 
 .progress-info .current-row.is-decrease {
-  color: #9b59b6 !important;
+  color: #8e7a6b !important;
 }
 
 .progress-info .total-row {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2d3436;
+  color: #3c3835;
   margin-left: 2px;
 }
 
@@ -569,12 +574,12 @@ button {
 }
 
 .btn-minus {
-  background-color: #dfe4ea;
-  color: #2d3436;
+  background-color: #f4f1ea;
+  color: #3c3835;
 }
 
 .btn-plus {
-  background-color: #00b894;
+  background-color: #5c5238;
   color: white;
 }
 
@@ -595,7 +600,7 @@ button {
   .sidebar {
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid #f1f2f6;
+    border-bottom: 1px solid #e8e4de;
     padding-right: 0;
     padding-bottom: 16px;
   }
@@ -607,14 +612,14 @@ button {
 .drag-handle {
   cursor: grab;
   font-size: 1.1rem;
-  color: #b2bec3;
+  color: #b0a89e;
   margin-right: 8px;
   user-select: none;
   transition: color 0.2s ease;
 }
 
 .drag-handle:hover {
-  color: #e67e22;
+  color: #5c5238;
 }
 
 .drag-handle:active {
@@ -624,12 +629,12 @@ button {
 /* 拖曳中的卡片樣式 */
 .counter-card.dragging {
   opacity: 0.4;
-  border: 2px dashed #e67e22 !important;
-  background-color: #fff8ed !important;
+  border: 2px dashed #5c5238 !important;
+  background-color: #faf9f6 !important;
 }
 
 /* 拖曳經過目標卡片時的上方指示線 */
 .counter-card.drag-over {
-  border-top: 3px solid #e67e22 !important;
+  border-top: 3px solid #5c5238 !important;
   transform: translateY(2px);
 }
